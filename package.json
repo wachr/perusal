@@ -1,6 +1,7 @@
 {
   "private": true,
   "name": "perusal",
+  "description": "A simple mind-mapping tool written in Preact.",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
