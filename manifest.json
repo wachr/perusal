@@ -1,0 +1,16 @@
+{
+  "name": "perusal",
+  "short_name": "perusal",
+  "start_url": "perusal",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fff",
+  "theme_color": "#673ab8",
+  "icons": [
+    {
+      "src": "./assets/icon.svg",
+      "type": "image/svg",
+      "sizes": "256x256"
+    }
+  ]
+}
