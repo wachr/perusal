@@ -1,11 +1,4 @@
-import "./style";
-import baseroute from "./baseroute";
+import './style';
+import App from './components/App';
 
-export default function App() {
-  return (
-    <div>
-      <h1>Hello, World!</h1>
-      <img src={`${baseroute}/assets/icon.svg`} />
-    </div>
-  );
-}
+export default App;
