@@ -1,10 +1,11 @@
-import baseroute from "../utils/baseroute";
 import { h } from "preact";
 import AppBar from "@mui/material/AppBar";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
+
+import baseroute from "../utils/baseroute";
 
 const theme = createTheme({
   palette: {
