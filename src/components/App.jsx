@@ -1,4 +1,5 @@
 import { h } from "preact";
+import { useState } from "preact/hooks";
 import AppBar from "@mui/material/AppBar";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
@@ -6,6 +7,7 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 
 import baseroute from "../utils/baseroute";
+import StateInspector from "./StateInspector";
 
 const theme = createTheme({
   palette: {
@@ -26,7 +28,18 @@ const theme = createTheme({
   }
 });
 
+const stubbedOutState = {
+  foo: {
+    detail: "details about foo",
+    bar: {
+      detail: "details about bar",
+      baz: []
+    }
+  }
+};
+
 export default function App() {
+  const [appState, setAppState] = useState(stubbedOutState);
   return (
     <div id="App">
       <ThemeProvider theme={theme}>
@@ -36,7 +49,7 @@ export default function App() {
         </AppBar>
         <Toolbar />
         <Paper elevation={0}>
-          <h1>Hello, World!</h1>
+          <StateInspector nodeState={appState} setNode={setAppState} />
         </Paper>
       </ThemeProvider>
     </div>
