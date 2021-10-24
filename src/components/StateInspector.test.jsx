@@ -1,5 +1,5 @@
 import { h } from "preact";
-import { render, screen } from "@testing-library/preact";
+import { fireEvent, render, screen } from "@testing-library/preact";
 
 import StateInspector from "./StateInspector";
 
@@ -23,5 +23,14 @@ describe("StateInspector", () => {
 
     const subject = await screen.getByTestId("StateInspector-div");
     expect(subject).toMatchSnapshot();
+  });
+
+  it("should be collapsible", () => {
+    render(<StateInspector nodeState={{}} setNode={jest.fn()} />);
+    // App state is rendered by default
+    expect(screen.queryByLabelText("app state")).not.toBeNull();
+    const collapseButton = screen.getByLabelText("show or hide state");
+    fireEvent.click(collapseButton);
+    expect(screen.queryByLabelText("app state")).toBeNull();
   });
 });
