@@ -38,7 +38,7 @@
     "@mui/icons-material": "^5.0.4",
     "@mui/material": "^5.0.4",
     "browser-fs-access": "^0.20.5",
-    "dompurify": "^2.3.3",
+    "isomorphic-dompurify": "^0.15.0",
     "preact": "^10.1.0",
     "preact-render-to-string": "^5.1.2",
     "prop-types": "^15.7.2"
