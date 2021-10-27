@@ -7,6 +7,7 @@ import Typography from "@mui/material/Typography";
 
 import baseroute from "../utils/baseroute";
 import StateInspector from "./StateInspector";
+import TopicCards from "./TopicCards";
 
 const theme = createTheme({
   palette: {
@@ -27,15 +28,12 @@ const theme = createTheme({
   }
 });
 
-const stubbedOutState = {
-  foo: {
-    detail: "details about foo",
-    bar: {
-      detail: "details about bar",
-      baz: []
-    }
-  }
-};
+const stubbedOutState = [
+  { topicTitle: "foo" },
+  { topicTitle: "bar", topicDetails: "barbar bar barbarbar" },
+  "baz",
+  { topicTitle: "quux", topicSubtopics: ["q", "u", "u", "x"] }
+];
 
 export default function App() {
   const [appState, setAppState] = useState(stubbedOutState);
@@ -47,6 +45,7 @@ export default function App() {
           <Typography variant="caption">perusal</Typography>
         </AppBar>
         <Toolbar />
+        <TopicCards topics={appState} />
         <StateInspector nodeState={appState} setNode={setAppState} />
       </ThemeProvider>
     </div>
