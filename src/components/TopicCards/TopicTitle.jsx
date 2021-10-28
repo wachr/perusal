@@ -5,7 +5,7 @@ import Typography from "@mui/material/Typography";
 import { TOPIC_OBJECT, TOPIC_STRING } from "./constants";
 import { discriminating } from "./utils";
 
-export default function TopicTitle({ topic }) {
+function TopicTitle({ topic }) {
   return discriminating(topic)([TOPIC_STRING, TOPIC_OBJECT], () => (
     <Typography variant="h6" data-testid="topic-title">
       {topic.topicTitle || topic}
@@ -21,3 +21,5 @@ TopicTitle.propTypes = {
     })
   ]).isRequired
 };
+
+export default TopicTitle;

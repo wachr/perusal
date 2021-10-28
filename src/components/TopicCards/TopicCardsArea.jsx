@@ -13,7 +13,7 @@ import TopicCard from "./TopicCard";
 import TopicSubtopics from "./TopicSubtopics";
 import TopicTitle from "./TopicTitle";
 
-export default function TopicCardsArea({ topics }) {
+function TopicCardsArea({ topics }) {
   function renderTopic(topics) {
     switch (discriminateTopic(topics)) {
       case TOPIC_ARRAY:
@@ -35,3 +35,5 @@ TopicCardsArea.propTypes = {
     SINGLE_TOPIC_PROP_TYPE
   ]).isRequired
 };
+
+export default TopicCardsArea;

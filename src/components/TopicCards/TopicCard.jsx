@@ -17,7 +17,7 @@ import { discriminateTopic } from "./utils";
 import TopicSubtopics from "./TopicSubtopics";
 import TopicTitle from "./TopicTitle";
 
-export default function TopicCard({ topic }) {
+function TopicCard({ topic }) {
   function renderTopic() {
     switch (discriminateTopic(topic)) {
       case TOPIC_STRING:
@@ -54,3 +54,5 @@ export default function TopicCard({ topic }) {
 TopicCard.proptypes = {
   topic: SINGLE_TOPIC_PROP_TYPE.isRequired
 };
+
+export default TopicCard;
