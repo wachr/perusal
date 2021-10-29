@@ -23,6 +23,146 @@ exports[`App renders 1`] = `
       class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1t29gy6-MuiToolbar-root"
     />
     <div
+      id="TopicCards"
+    >
+      <div
+        class="MuiBox-root css-1s8p6ck"
+      >
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-i95gtt-MuiPaper-root-MuiCard-root"
+        >
+          <div
+            class="css-nen11g-MuiStack-root"
+          >
+            <h6
+              class="MuiTypography-root MuiTypography-h6 css-2ulfj5-MuiTypography-root"
+              data-testid="topic-title"
+            >
+              foo
+            </h6>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-1s8p6ck"
+      >
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-i95gtt-MuiPaper-root-MuiCard-root"
+        >
+          <div
+            class="css-nen11g-MuiStack-root"
+          >
+            <h6
+              class="MuiTypography-root MuiTypography-h6 css-2ulfj5-MuiTypography-root"
+              data-testid="topic-title"
+            >
+              bar
+            </h6>
+            <hr
+              class="MuiDivider-root MuiDivider-fullWidth css-9mgopn-MuiDivider-root"
+            />
+            <span
+              class="MuiTypography-root MuiTypography-body css-37jdci-MuiTypography-root"
+              data-testid="topic-details"
+            >
+              barbar bar barbarbar
+            </span>
+          </div>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-1s8p6ck"
+      >
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-i95gtt-MuiPaper-root-MuiCard-root"
+        >
+          <h6
+            class="MuiTypography-root MuiTypography-h6 css-2ulfj5-MuiTypography-root"
+            data-testid="topic-title"
+          >
+            baz
+          </h6>
+        </div>
+      </div>
+      <div
+        class="MuiBox-root css-1s8p6ck"
+      >
+        <div
+          class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-i95gtt-MuiPaper-root-MuiCard-root"
+        >
+          <div
+            class="css-nen11g-MuiStack-root"
+          >
+            <h6
+              class="MuiTypography-root MuiTypography-h6 css-2ulfj5-MuiTypography-root"
+              data-testid="topic-title"
+            >
+              quux
+            </h6>
+            <hr
+              class="MuiDivider-root MuiDivider-fullWidth css-9mgopn-MuiDivider-root"
+            />
+            <ul
+              class="MuiList-root MuiList-padding css-h4y409-MuiList-root"
+            >
+              <li
+                class="MuiListItem-root MuiListItem-gutters css-1wrjpai-MuiListItem-root"
+              >
+                <div
+                  class="MuiListItemText-root MuiListItemText-inset css-1fzmbpm-MuiListItemText-root"
+                >
+                  <span
+                    class="MuiTypography-root MuiTypography-body1 MuiListItemText-primary css-10hburv-MuiTypography-root"
+                  >
+                    q
+                  </span>
+                </div>
+              </li>
+              <li
+                class="MuiListItem-root MuiListItem-gutters css-1wrjpai-MuiListItem-root"
+              >
+                <div
+                  class="MuiListItemText-root MuiListItemText-inset css-1fzmbpm-MuiListItemText-root"
+                >
+                  <span
+                    class="MuiTypography-root MuiTypography-body1 MuiListItemText-primary css-10hburv-MuiTypography-root"
+                  >
+                    u
+                  </span>
+                </div>
+              </li>
+              <li
+                class="MuiListItem-root MuiListItem-gutters css-1wrjpai-MuiListItem-root"
+              >
+                <div
+                  class="MuiListItemText-root MuiListItemText-inset css-1fzmbpm-MuiListItemText-root"
+                >
+                  <span
+                    class="MuiTypography-root MuiTypography-body1 MuiListItemText-primary css-10hburv-MuiTypography-root"
+                  >
+                    u
+                  </span>
+                </div>
+              </li>
+              <li
+                class="MuiListItem-root MuiListItem-gutters css-1wrjpai-MuiListItem-root"
+              >
+                <div
+                  class="MuiListItemText-root MuiListItemText-inset css-1fzmbpm-MuiListItemText-root"
+                >
+                  <span
+                    class="MuiTypography-root MuiTypography-body1 MuiListItemText-primary css-10hburv-MuiTypography-root"
+                  >
+                    x
+                  </span>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div
       data-testid="StateInspector-div"
     >
       <div
