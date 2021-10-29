@@ -88,7 +88,11 @@ const StateInspector = ({ nodeState, setNode }) => {
 };
 
 StateInspector.propTypes = {
-  nodeState: PropTypes.shape().isRequired,
+  nodeState: PropTypes.oneOfType([
+    PropTypes.shape(),
+    PropTypes.array,
+    PropTypes.string
+  ]).isRequired,
   setNode: PropTypes.func.isRequired
 };
 

@@ -54,7 +54,7 @@ class DiscriminatingTopic {
           return renderFn();
         return null;
       }, null) ||
-      this.#defaultCase ||
+      (this.#defaultCase && this.#defaultCase()) ||
       null
     );
   }

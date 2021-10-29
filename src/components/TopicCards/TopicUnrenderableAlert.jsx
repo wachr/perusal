@@ -15,7 +15,7 @@ function TopicUnrenderableAlert({ topic }) {
         margin="normal"
         aria-label="unrecognized content"
         fullWidth
-        defaultValue={JSON.stringify(topics, null, "\t")}
+        defaultValue={JSON.stringify(topic, null, "\t")}
         inputProps={{ readOnly: true }}
       />
     </Alert>
@@ -23,7 +23,7 @@ function TopicUnrenderableAlert({ topic }) {
 }
 
 TopicUnrenderableAlert.propTypes = {
-  topic: PropTypes.node
+  topic: PropTypes.any.isRequired
 };
 
 export default TopicUnrenderableAlert;
