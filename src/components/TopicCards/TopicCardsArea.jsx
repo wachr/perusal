@@ -5,10 +5,9 @@ import {
   TOPIC_ARRAY,
   TOPIC_OBJECT,
   TOPIC_STRING,
-  SINGLE_TOPIC_PROP_TYPE
-} from "./constants";
-import { discriminating } from "./Discriminating";
-import TopicCard from "./TopicCard";
+  discriminating
+} from "./DiscriminatingByType";
+import TopicCard, { SINGLE_TOPIC_PROP_TYPE } from "./TopicCard";
 import TopicSubtopics from "./TopicSubtopics";
 import TopicTitle from "./TopicTitle";
 import TopicUnrenderableAlert from "./TopicUnrenderableAlert";
@@ -21,7 +20,7 @@ function TopicCardsArea({ topics }) {
         .renderWith(() => topics.map(topic => <TopicCard topic={topic} />))
         .considering(TOPIC_OBJECT, TOPIC_STRING)
         .renderWith(() => <TopicCard topic={topics} />)
-        .renderWithDefault(() => <TopicUnrenderableAlert topic={topics} />)
+        .defaultTo(() => <TopicUnrenderableAlert topic={topics} />)
         .render()}
     </div>
   );

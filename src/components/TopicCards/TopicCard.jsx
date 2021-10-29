@@ -2,15 +2,15 @@ import { h } from "preact";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Divider from "@mui/material/Divider";
+import PropTypes from "prop-types";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 
 import {
   TOPIC_OBJECT,
   TOPIC_STRING,
-  SINGLE_TOPIC_PROP_TYPE
-} from "./constants";
-import { discriminating } from "./Discriminating";
+  discriminating
+} from "./DiscriminatingByType";
 import TopicSubtopics from "./TopicSubtopics";
 import TopicTitle from "./TopicTitle";
 import TopicUnrenderableAlert from "./TopicUnrenderableAlert";
@@ -35,12 +35,28 @@ function TopicCard({ topic }) {
               <TopicSubtopics topic={topic} />
             </Stack>
           ))
-          .renderWithDefault(() => <TopicUnrenderableAlert topic={topic} />)
+          .defaultTo(() => <TopicUnrenderableAlert topic={topic} />)
           .render()}
       </Card>
     </Box>
   );
 }
+
+export const SINGLE_TOPIC_PROP_TYPE = PropTypes.oneOfType([
+  PropTypes.string,
+  PropTypes.shape({
+    topicTitle: PropTypes.string.isRequired,
+    topicDetails: PropTypes.string,
+    topicSubtopics: PropTypes.arrayOf(
+      PropTypes.oneOfType([
+        PropTypes.string,
+        PropTypes.shape({
+          topicTitle: PropTypes.string.isRequired
+        })
+      ]).isRequired
+    )
+  })
+]).isRequired;
 
 TopicCard.proptypes = {
   topic: SINGLE_TOPIC_PROP_TYPE.isRequired
