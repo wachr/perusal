@@ -5,28 +5,26 @@ import {
   TOPIC_ARRAY,
   TOPIC_OBJECT,
   TOPIC_STRING,
-  TOPIC_UNKNOWN,
   SINGLE_TOPIC_PROP_TYPE
 } from "./constants";
-import { discriminateTopic } from "./utils";
+import { discriminating } from "./Discriminating";
 import TopicCard from "./TopicCard";
 import TopicSubtopics from "./TopicSubtopics";
 import TopicTitle from "./TopicTitle";
+import TopicUnrenderableAlert from "./TopicUnrenderableAlert";
 
 function TopicCardsArea({ topics }) {
-  function renderTopic(topics) {
-    switch (discriminateTopic(topics)) {
-      case TOPIC_ARRAY:
-        return topics.map(topic => <TopicCard topic={topic} />);
-      case TOPIC_OBJECT:
-      case TOPIC_STRING:
-        return <TopicCard topic={topics} />;
-      case TOPIC_UNKNOWN:
-      default:
-        throw new Error(`Unable to render topic ${topics}`);
-    }
-  }
-  return <div id="TopicCards">{renderTopic(topics)}</div>;
+  return (
+    <div id="TopicCards">
+      {discriminating(topics)
+        .considering(TOPIC_ARRAY)
+        .renderWith(() => topics.map(topic => <TopicCard topic={topic} />))
+        .considering(TOPIC_OBJECT, TOPIC_STRING)
+        .renderWith(() => <TopicCard topic={topics} />)
+        .renderWithDefault(() => <TopicUnrenderableAlert topic={topics} />)
+        .render()}
+    </div>
+  );
 }
 
 TopicCardsArea.propTypes = {
