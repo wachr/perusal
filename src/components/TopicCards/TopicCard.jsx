@@ -14,31 +14,35 @@ import {
 import TopicSubtopics from "./TopicSubtopics";
 import TopicTitle from "./TopicTitle";
 import TopicUnrenderableAlert from "./TopicUnrenderableAlert";
+import { selectByPath } from "./Lenses";
 
-function TopicCard({ topic }) {
+function TopicCard({ topic, path }) {
+  const topicToRender = selectByPath(topic, path);
   return (
-    <Box sx={{ width: "400px", padding: "3px" }}>
-      <Card>
-        {discriminating(topic)
-          .considering(TOPIC_STRING)
-          .renderWith(() => <TopicTitle topic={topic} />)
-          .considering(TOPIC_OBJECT)
-          .renderWith(() => (
-            <Stack>
-              <TopicTitle topic={topic} />
-              {(topic.topicDetails || topic.topicSubtopics) && <Divider />}
-              {topic.topicDetails && (
-                <Typography variant="body" data-testid="topic-details">
-                  {topic.topicDetails}
-                </Typography>
-              )}
-              <TopicSubtopics topic={topic} />
-            </Stack>
-          ))
-          .defaultTo(() => <TopicUnrenderableAlert topic={topic} />)
-          .render()}
-      </Card>
-    </Box>
+    <div id="TopicCard" data-testid="topic-card">
+      <Box sx={{ width: "400px", padding: "3px" }}>
+        <Card>
+          {discriminating(topicToRender)
+            .considering(TOPIC_STRING)
+            .renderWith(() => <TopicTitle topic={topicToRender} />)
+            .considering(TOPIC_OBJECT)
+            .renderWith(() => (
+              <Stack>
+                <TopicTitle topic={topicToRender} />
+                {(topic.topicDetails || topic.topicSubtopics) && <Divider />}
+                {topic.topicDetails && (
+                  <Typography variant="body" data-testid="topic-details">
+                    {topic.topicDetails}
+                  </Typography>
+                )}
+                <TopicSubtopics topic={topicToRender} />
+              </Stack>
+            ))
+            .defaultTo(() => <TopicUnrenderableAlert topic={topicToRender} />)
+            .render()}
+        </Card>
+      </Box>
+    </div>
   );
 }
 
@@ -59,7 +63,12 @@ export const SINGLE_TOPIC_PROP_TYPE = PropTypes.oneOfType([
 ]).isRequired;
 
 TopicCard.proptypes = {
-  topic: SINGLE_TOPIC_PROP_TYPE.isRequired
+  topic: SINGLE_TOPIC_PROP_TYPE.isRequired,
+  path: PropTypes.arrayOf(PropTypes.string.isRequired)
+};
+
+TopicCard.defaultProps = {
+  path: []
 };
 
 export default TopicCard;

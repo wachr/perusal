@@ -1,0 +1,45 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TopicCard should be able to render a minimal subtopic 1`] = `
+<div
+  data-testid="topic-card"
+  id="TopicCard"
+>
+  <div
+    class="MuiBox-root css-1s8p6ck"
+  >
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-bhp9pd-MuiPaper-root-MuiCard-root"
+    >
+      <h6
+        class="MuiTypography-root MuiTypography-h6 css-2ulfj5-MuiTypography-root"
+        data-testid="topic-title"
+      >
+        bar
+      </h6>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`TopicCard should render with minimal state 1`] = `
+<div
+  data-testid="topic-card"
+  id="TopicCard"
+>
+  <div
+    class="MuiBox-root css-1s8p6ck"
+  >
+    <div
+      class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-bhp9pd-MuiPaper-root-MuiCard-root"
+    >
+      <h6
+        class="MuiTypography-root MuiTypography-h6 css-2ulfj5-MuiTypography-root"
+        data-testid="topic-title"
+      >
+        foo
+      </h6>
+    </div>
+  </div>
+</div>
+`;

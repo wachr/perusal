@@ -38,14 +38,15 @@ class DiscriminatingByType {
     return this;
   }
 
+  type() {
+    return DiscriminatingByType.discriminator(this.#topic);
+  }
+
   render() {
     return (
       this.#cases.reduce((rendered, [topicTypes, renderFn]) => {
         if (rendered) return rendered;
-        if (
-          topicTypes.includes(DiscriminatingByType.discriminator(this.#topic))
-        )
-          return renderFn();
+        if (topicTypes.includes(this.type())) return renderFn();
         return null;
       }, null) ||
       (this.#defaultCase && this.#defaultCase()) ||
