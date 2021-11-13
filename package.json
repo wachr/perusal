@@ -42,6 +42,7 @@
     "dompurify": "^2.3.3",
     "preact": "^10.1.0",
     "preact-render-to-string": "^5.1.2",
-    "prop-types": "^15.7.2"
+    "prop-types": "^15.7.2",
+    "wouter-preact": "^2.8.0-alpha.2"
   }
 }

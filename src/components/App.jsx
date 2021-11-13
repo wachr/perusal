@@ -4,6 +4,7 @@ import AppBar from "@mui/material/AppBar";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
+import { Router } from "wouter-preact";
 
 import baseroute from "../utils/baseroute";
 import StateInspector from "./StateInspector";
@@ -39,15 +40,17 @@ export default function App() {
   const [appState, setAppState] = useState(stubbedOutState);
   return (
     <div id="App">
-      <ThemeProvider theme={theme}>
-        <AppBar>
-          <img src={`${baseroute}/assets/icon.svg`} width={32} height={32} />
-          <Typography variant="caption">perusal</Typography>
-        </AppBar>
-        <Toolbar />
-        <TopicCards topics={appState} />
-        <StateInspector nodeState={appState} setNode={setAppState} />
-      </ThemeProvider>
+      <Router base={baseroute}>
+        <ThemeProvider theme={theme}>
+          <AppBar>
+            <img src={`${baseroute}/assets/icon.svg`} width={32} height={32} />
+            <Typography variant="caption">perusal</Typography>
+          </AppBar>
+          <Toolbar />
+          <TopicCards topics={appState} />
+          <StateInspector nodeState={appState} setNode={setAppState} />
+        </ThemeProvider>
+      </Router>
     </div>
   );
 }

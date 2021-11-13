@@ -5,6 +5,7 @@ import Divider from "@mui/material/Divider";
 import PropTypes from "prop-types";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
+import { useRoute } from "wouter-preact";
 
 import {
   TOPIC_OBJECT,
@@ -16,8 +17,11 @@ import TopicTitle from "./TopicTitle";
 import TopicUnrenderableAlert from "./TopicUnrenderableAlert";
 import { selectByPath } from "./Lenses";
 
-function TopicCard({ topic, path }) {
+function TopicCard({ topic }) {
+  const [_, { topicPath }] = useRoute("/:topicPath*");
+  const path = (topicPath && topicPath.split("/")) || [];
   const topicToRender = selectByPath(topic, path);
+  if (!topicToRender) return null;
   return (
     <div id="TopicCard" data-testid="topic-card">
       <Box sx={{ width: "400px", padding: "3px" }}>
@@ -38,7 +42,9 @@ function TopicCard({ topic, path }) {
                 <TopicSubtopics topic={topicToRender} />
               </Stack>
             ))
-            .defaultTo(() => <TopicUnrenderableAlert topic={topicToRender} />)
+            .defaultTo(() => (
+              <TopicUnrenderableAlert topic={topicToRender || topicPath} />
+            ))
             .render()}
         </Card>
       </Box>
@@ -63,12 +69,7 @@ export const SINGLE_TOPIC_PROP_TYPE = PropTypes.oneOfType([
 ]).isRequired;
 
 TopicCard.proptypes = {
-  topic: SINGLE_TOPIC_PROP_TYPE.isRequired,
-  path: PropTypes.arrayOf(PropTypes.string.isRequired)
-};
-
-TopicCard.defaultProps = {
-  path: []
+  topic: SINGLE_TOPIC_PROP_TYPE.isRequired
 };
 
 export default TopicCard;

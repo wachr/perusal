@@ -5,6 +5,13 @@ import { TOPIC_STRING, discriminating } from "./DiscriminatingByType";
 import { selectByPath } from "./Lenses";
 import TopicCard from "./TopicCard";
 
+jest.mock("wouter-preact");
+const wouter = require("wouter-preact");
+
+afterEach(() => {
+  wouter.__resetMocks();
+});
+
 describe(TopicCard.name, () => {
   it("should render with minimal state", () => {
     render(<TopicCard topic={"foo"} />);
@@ -18,7 +25,8 @@ describe(TopicCard.name, () => {
       topicSubtopics: ["bar"]
     };
     const path = ["foo", "bar"];
-    render(<TopicCard topic={topic} path={path} />);
+    wouter.__setMockRoute([true, { topicPath: path.join("/") }]);
+    render(<TopicCard topic={topic} />);
     expect(selectByPath(topic, path)).toBe("bar");
     expect(discriminating(selectByPath(topic, path)).type()).toBe(TOPIC_STRING);
     const topicCard = screen.queryByTestId("topic-card");
@@ -31,7 +39,8 @@ describe(TopicCard.name, () => {
       topicSubtopics: ["bar", "baz"]
     };
     const path = ["foo", "bar"];
-    render(<TopicCard topic={topic} path={path} />);
+    wouter.__setMockRoute([true, { topicPath: path.join("/") }]);
+    render(<TopicCard topic={topic} />);
     const topicCard = screen.queryByTestId("topic-card");
     expect(topicCard).not.toHaveTextContent("foo");
     expect(topicCard).toHaveTextContent("bar");
