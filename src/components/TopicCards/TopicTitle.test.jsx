@@ -8,12 +8,16 @@ describe(TopicTitle.name, () => {
     render(<TopicTitle topic={{ topicTitle: "foo" }} />);
     const title = screen.queryByTestId("topic-title");
     expect(title).not.toBeNull();
+    expect(title).toHaveTextContent("foo");
+    expect(title).toMatchSnapshot();
   });
 
   it("should render strings", () => {
     render(<TopicTitle topic={"foo"} />);
     const title = screen.queryByTestId("topic-title");
     expect(title).not.toBeNull();
+    expect(title).toHaveTextContent("foo");
+    expect(title).toMatchSnapshot();
   });
 
   it("should not render arrays", () => {

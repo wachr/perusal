@@ -5,11 +5,17 @@ import { TOPIC_STRING, discriminating } from "./DiscriminatingByType";
 import { selectByPath } from "./Lenses";
 import TopicCard from "./TopicCard";
 
-jest.mock("wouter-preact");
-const wouter = require("wouter-preact");
+jest.mock("wouter-preact", () => {
+  const wouterActual = jest.requireActual("wouter-preact");
+  return {
+    ...wouterActual,
+    useRoute: jest.fn().mockReturnValue([false, {}])
+  };
+});
+const useRoute = require("wouter-preact").useRoute;
 
 afterEach(() => {
-  wouter.__resetMocks();
+  useRoute.mockClear();
 });
 
 describe(TopicCard.name, () => {
@@ -25,12 +31,13 @@ describe(TopicCard.name, () => {
       topicSubtopics: ["bar"]
     };
     const path = ["foo", "bar"];
-    wouter.__setMockRoute([true, { topicPath: path.join("/") }]);
+    useRoute.mockReturnValueOnce([true, { topicPath: path.join("/") }]);
     render(<TopicCard topic={topic} />);
     expect(selectByPath(topic, path)).toBe("bar");
     expect(discriminating(selectByPath(topic, path)).type()).toBe(TOPIC_STRING);
     const topicCard = screen.queryByTestId("topic-card");
     expect(topicCard).toMatchSnapshot();
+    expect(topicCard).toHaveTextContent("bar");
   });
 
   it("should be able to lens into a subtopic", () => {
@@ -39,7 +46,7 @@ describe(TopicCard.name, () => {
       topicSubtopics: ["bar", "baz"]
     };
     const path = ["foo", "bar"];
-    wouter.__setMockRoute([true, { topicPath: path.join("/") }]);
+    useRoute.mockReturnValueOnce([true, { topicPath: path.join("/") }]);
     render(<TopicCard topic={topic} />);
     const topicCard = screen.queryByTestId("topic-card");
     expect(topicCard).not.toHaveTextContent("foo");

@@ -1,0 +1,27 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TopicTitle should render objects 1`] = `
+<div
+  data-testid="topic-title"
+>
+  <a
+    class="MuiTypography-root MuiTypography-h6 MuiLink-root MuiLink-underlineAlways css-igcn10-MuiTypography-root-MuiLink-root"
+    href="foo"
+  >
+    foo
+  </a>
+</div>
+`;
+
+exports[`TopicTitle should render strings 1`] = `
+<div
+  data-testid="topic-title"
+>
+  <a
+    class="MuiTypography-root MuiTypography-h6 MuiLink-root MuiLink-underlineAlways css-igcn10-MuiTypography-root-MuiLink-root"
+    href="foo"
+  >
+    foo
+  </a>
+</div>
+`;

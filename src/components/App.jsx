@@ -1,10 +1,12 @@
 import { h } from "preact";
 import { useState } from "preact/hooks";
 import AppBar from "@mui/material/AppBar";
+import ButtonBase from "@mui/material/ButtonBase";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import { Router } from "wouter-preact";
+import { Link as WouterLink, Router } from "wouter-preact";
 
 import baseroute from "../utils/baseroute";
 import StateInspector from "./StateInspector";
@@ -43,8 +45,18 @@ export default function App() {
       <Router base={baseroute}>
         <ThemeProvider theme={theme}>
           <AppBar>
-            <img src={`${baseroute}/assets/icon.svg`} width={32} height={32} />
-            <Typography variant="caption">perusal</Typography>
+            <WouterLink href={baseroute || "/"}>
+              <ButtonBase>
+                <Stack>
+                  <img
+                    src={`${baseroute}/assets/icon.svg`}
+                    width={32}
+                    height={32}
+                  />
+                  <Typography variant="caption">perusal</Typography>
+                </Stack>
+              </ButtonBase>
+            </WouterLink>
           </AppBar>
           <Toolbar />
           <TopicCards topics={appState} />

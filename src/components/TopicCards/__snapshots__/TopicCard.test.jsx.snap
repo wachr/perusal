@@ -11,12 +11,16 @@ exports[`TopicCard should be able to render a minimal subtopic 1`] = `
     <div
       class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-bhp9pd-MuiPaper-root-MuiCard-root"
     >
-      <h6
-        class="MuiTypography-root MuiTypography-h6 css-2ulfj5-MuiTypography-root"
+      <div
         data-testid="topic-title"
       >
-        bar
-      </h6>
+        <a
+          class="MuiTypography-root MuiTypography-h6 MuiLink-root MuiLink-underlineAlways css-igcn10-MuiTypography-root-MuiLink-root"
+          href="bar"
+        >
+          bar
+        </a>
+      </div>
     </div>
   </div>
 </div>
@@ -33,12 +37,16 @@ exports[`TopicCard should render with minimal state 1`] = `
     <div
       class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-bhp9pd-MuiPaper-root-MuiCard-root"
     >
-      <h6
-        class="MuiTypography-root MuiTypography-h6 css-2ulfj5-MuiTypography-root"
+      <div
         data-testid="topic-title"
       >
-        foo
-      </h6>
+        <a
+          class="MuiTypography-root MuiTypography-h6 MuiLink-root MuiLink-underlineAlways css-igcn10-MuiTypography-root-MuiLink-root"
+          href="foo"
+        >
+          foo
+        </a>
+      </div>
     </div>
   </div>
 </div>

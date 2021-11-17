@@ -8,16 +8,29 @@ exports[`App renders 1`] = `
     <header
       class="MuiPaper-root MuiPaper-elevation MuiPaper-elevation4 MuiAppBar-root MuiAppBar-colorPrimary MuiAppBar-positionFixed mui-fixed css-hxfn6i-MuiPaper-root-MuiAppBar-root"
     >
-      <img
-        height="32"
-        src="/assets/icon.svg"
-        width="32"
-      />
-      <span
-        class="MuiTypography-root MuiTypography-caption css-1sn4lm3-MuiTypography-root"
+      <a
+        class="MuiButtonBase-root css-10d1a0h-MuiButtonBase-root"
+        href="/"
+        tabindex="0"
       >
-        perusal
-      </span>
+        <div
+          class="css-nen11g-MuiStack-root"
+        >
+          <img
+            height="32"
+            src="/assets/icon.svg"
+            width="32"
+          />
+          <span
+            class="MuiTypography-root MuiTypography-caption css-1sn4lm3-MuiTypography-root"
+          >
+            perusal
+          </span>
+        </div>
+        <span
+          class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
+        />
+      </a>
     </header>
     <div
       class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1t29gy6-MuiToolbar-root"
@@ -38,12 +51,16 @@ exports[`App renders 1`] = `
             <div
               class="css-nen11g-MuiStack-root"
             >
-              <h6
-                class="MuiTypography-root MuiTypography-h6 css-2ulfj5-MuiTypography-root"
+              <div
                 data-testid="topic-title"
               >
-                foo
-              </h6>
+                <a
+                  class="MuiTypography-root MuiTypography-h6 MuiLink-root MuiLink-underlineAlways css-103xwh2-MuiTypography-root-MuiLink-root"
+                  href="foo"
+                >
+                  foo
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -61,12 +78,16 @@ exports[`App renders 1`] = `
             <div
               class="css-nen11g-MuiStack-root"
             >
-              <h6
-                class="MuiTypography-root MuiTypography-h6 css-2ulfj5-MuiTypography-root"
+              <div
                 data-testid="topic-title"
               >
-                bar
-              </h6>
+                <a
+                  class="MuiTypography-root MuiTypography-h6 MuiLink-root MuiLink-underlineAlways css-103xwh2-MuiTypography-root-MuiLink-root"
+                  href="bar"
+                >
+                  bar
+                </a>
+              </div>
               <hr
                 class="MuiDivider-root MuiDivider-fullWidth css-9mgopn-MuiDivider-root"
               />
@@ -90,12 +111,16 @@ exports[`App renders 1`] = `
           <div
             class="MuiPaper-root MuiPaper-elevation MuiPaper-rounded MuiPaper-elevation1 MuiCard-root css-i95gtt-MuiPaper-root-MuiCard-root"
           >
-            <h6
-              class="MuiTypography-root MuiTypography-h6 css-2ulfj5-MuiTypography-root"
+            <div
               data-testid="topic-title"
             >
-              baz
-            </h6>
+              <a
+                class="MuiTypography-root MuiTypography-h6 MuiLink-root MuiLink-underlineAlways css-103xwh2-MuiTypography-root-MuiLink-root"
+                href="baz"
+              >
+                baz
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -112,12 +137,16 @@ exports[`App renders 1`] = `
             <div
               class="css-nen11g-MuiStack-root"
             >
-              <h6
-                class="MuiTypography-root MuiTypography-h6 css-2ulfj5-MuiTypography-root"
+              <div
                 data-testid="topic-title"
               >
-                quux
-              </h6>
+                <a
+                  class="MuiTypography-root MuiTypography-h6 MuiLink-root MuiLink-underlineAlways css-103xwh2-MuiTypography-root-MuiLink-root"
+                  href="quux"
+                >
+                  quux
+                </a>
+              </div>
               <hr
                 class="MuiDivider-root MuiDivider-fullWidth css-9mgopn-MuiDivider-root"
               />
@@ -126,9 +155,11 @@ exports[`App renders 1`] = `
               >
                 <li
                   class="MuiListItem-root MuiListItem-gutters css-1wrjpai-MuiListItem-root"
+                  data-testid="topic-subtopic"
                 >
                   <div
                     class="MuiListItemText-root MuiListItemText-inset css-1fzmbpm-MuiListItemText-root"
+                    href="quux/q"
                   >
                     <span
                       class="MuiTypography-root MuiTypography-body1 MuiListItemText-primary css-10hburv-MuiTypography-root"
@@ -139,9 +170,11 @@ exports[`App renders 1`] = `
                 </li>
                 <li
                   class="MuiListItem-root MuiListItem-gutters css-1wrjpai-MuiListItem-root"
+                  data-testid="topic-subtopic"
                 >
                   <div
                     class="MuiListItemText-root MuiListItemText-inset css-1fzmbpm-MuiListItemText-root"
+                    href="quux/u"
                   >
                     <span
                       class="MuiTypography-root MuiTypography-body1 MuiListItemText-primary css-10hburv-MuiTypography-root"
@@ -152,9 +185,11 @@ exports[`App renders 1`] = `
                 </li>
                 <li
                   class="MuiListItem-root MuiListItem-gutters css-1wrjpai-MuiListItem-root"
+                  data-testid="topic-subtopic"
                 >
                   <div
                     class="MuiListItemText-root MuiListItemText-inset css-1fzmbpm-MuiListItemText-root"
+                    href="quux/u"
                   >
                     <span
                       class="MuiTypography-root MuiTypography-body1 MuiListItemText-primary css-10hburv-MuiTypography-root"
@@ -165,9 +200,11 @@ exports[`App renders 1`] = `
                 </li>
                 <li
                   class="MuiListItem-root MuiListItem-gutters css-1wrjpai-MuiListItem-root"
+                  data-testid="topic-subtopic"
                 >
                   <div
                     class="MuiListItemText-root MuiListItemText-inset css-1fzmbpm-MuiListItemText-root"
+                    href="quux/x"
                   >
                     <span
                       class="MuiTypography-root MuiTypography-body1 MuiListItemText-primary css-10hburv-MuiTypography-root"

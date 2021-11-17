@@ -1,6 +1,7 @@
 import { h, Fragment } from "preact";
 import PropTypes from "prop-types";
-import Typography from "@mui/material/Typography";
+import Link from "@mui/material/Link";
+import { Link as WouterLink } from "wouter-preact";
 
 import {
   TOPIC_OBJECT,
@@ -12,9 +13,11 @@ function TopicTitle({ topic }) {
   return discriminating(topic)
     .considering(TOPIC_STRING, TOPIC_OBJECT)
     .renderWith(() => (
-      <Typography variant="h6" data-testid="topic-title">
-        {topic.topicTitle || topic}
-      </Typography>
+      <div data-testid="topic-title">
+        <WouterLink href={topic.topicTitle || topic}>
+          <Link variant="h6">{topic.topicTitle || topic}</Link>
+        </WouterLink>
+      </div>
     ))
     .render();
 }

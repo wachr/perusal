@@ -2,6 +2,7 @@ import { h } from "preact";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
+import { Link as WouterLink } from "wouter-preact";
 import PropTypes from "prop-types";
 
 import {
@@ -18,8 +19,14 @@ function TopicSubtopics({ topic }) {
       const listItems = topic.topicSubtopics
         .filter(subtopic => typeof subtopic === "string" || subtopic.topicTitle)
         .map(subtopic => (
-          <ListItem disablePadding>
-            <ListItemText inset primary={subtopic.topicTitle || subtopic} />
+          <ListItem disablePadding data-testid="topic-subtopic">
+            <WouterLink
+              href={[topic.topicTitle, subtopic.topicTitle || subtopic].join(
+                "/"
+              )}
+            >
+              <ListItemText inset primary={subtopic.topicTitle || subtopic} />
+            </WouterLink>
           </ListItem>
         ));
       return <List>{listItems}</List>;
@@ -40,7 +47,7 @@ TopicSubtopics.propTypes = {
         ])
       )
     })
-  ])
+  ]).isRequired
 };
 
 export default TopicSubtopics;
