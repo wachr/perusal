@@ -1,6 +1,7 @@
 import { h } from "preact";
 import { useState } from "preact/hooks";
 import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
 import ButtonBase from "@mui/material/ButtonBase";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import Stack from "@mui/material/Stack";
@@ -45,18 +46,20 @@ export default function App() {
       <Router base={baseroute}>
         <ThemeProvider theme={theme}>
           <AppBar>
-            <WouterLink href={baseroute || "/"}>
-              <ButtonBase>
-                <Stack>
-                  <img
-                    src={`${baseroute}/assets/icon.svg`}
-                    width={32}
-                    height={32}
-                  />
-                  <Typography variant="caption">perusal</Typography>
-                </Stack>
-              </ButtonBase>
-            </WouterLink>
+            <Box>
+              <WouterLink href={baseroute || "/"}>
+                <ButtonBase size={"small"}>
+                  <Stack>
+                    <img
+                      src={`${baseroute}/assets/icon.svg`}
+                      width={32}
+                      height={32}
+                    />
+                    <Typography variant="caption">perusal</Typography>
+                  </Stack>
+                </ButtonBase>
+              </WouterLink>
+            </Box>
           </AppBar>
           <Toolbar />
           <TopicCards topics={appState} />

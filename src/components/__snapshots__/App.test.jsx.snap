@@ -8,29 +8,34 @@ exports[`App renders 1`] = `
     <header
       class="MuiPaper-root MuiPaper-elevation MuiPaper-elevation4 MuiAppBar-root MuiAppBar-colorPrimary MuiAppBar-positionFixed mui-fixed css-hxfn6i-MuiPaper-root-MuiAppBar-root"
     >
-      <a
-        class="MuiButtonBase-root css-10d1a0h-MuiButtonBase-root"
-        href="/"
-        tabindex="0"
+      <div
+        class="MuiBox-root css-0"
       >
-        <div
-          class="css-nen11g-MuiStack-root"
+        <a
+          class="MuiButtonBase-root css-10d1a0h-MuiButtonBase-root"
+          href="/"
+          size="small"
+          tabindex="0"
         >
-          <img
-            height="32"
-            src="/assets/icon.svg"
-            width="32"
-          />
-          <span
-            class="MuiTypography-root MuiTypography-caption css-1sn4lm3-MuiTypography-root"
+          <div
+            class="css-nen11g-MuiStack-root"
           >
-            perusal
-          </span>
-        </div>
-        <span
-          class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-        />
-      </a>
+            <img
+              height="32"
+              src="/assets/icon.svg"
+              width="32"
+            />
+            <span
+              class="MuiTypography-root MuiTypography-caption css-1sn4lm3-MuiTypography-root"
+            >
+              perusal
+            </span>
+          </div>
+          <span
+            class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
+          />
+        </a>
+      </div>
     </header>
     <div
       class="MuiToolbar-root MuiToolbar-gutters MuiToolbar-regular css-1t29gy6-MuiToolbar-root"
