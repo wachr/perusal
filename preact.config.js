@@ -9,5 +9,5 @@ export default {
     config.output.publicPath = publicPath;
     const { plugin } = helpers.getPluginsByName(config, "DefinePlugin")[0];
     Object.assign(plugin.definitions, { "process.env.GITHUB_PAGES": ghEnv });
-  }
+  },
 };

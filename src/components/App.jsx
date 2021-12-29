@@ -12,17 +12,17 @@ const theme = createTheme({
     primary: {
       main: "#815d56",
       light: "#be9c91",
-      dark: "#5f4339"
+      dark: "#5f4339",
     },
     secondary: {
       main: "#827717",
       light: "#b4a345",
-      dark: "#524a00"
+      dark: "#524a00",
     },
     background: {
-      paper: "#e6e6e6"
-    }
-  }
+      paper: "#e6e6e6",
+    },
+  },
 });
 
 export default function App() {

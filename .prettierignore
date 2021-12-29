@@ -1,0 +1,5 @@
+*.ico
+*.svg
+
+node_modules
+build
