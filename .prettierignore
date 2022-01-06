@@ -1,4 +1,5 @@
 *.ico
+*.snap
 *.svg
 
 node_modules
