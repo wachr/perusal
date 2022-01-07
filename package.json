@@ -13,6 +13,7 @@
     "lint": "eslint src --fix",
     "lint:check": "eslint src",
     "serve": "sirv build --port 8080 --cors --single",
+    "serve:gh": "sirv gh-local --port 8080 --cors --single",
     "test": "jest"
   },
   "eslintConfig": {

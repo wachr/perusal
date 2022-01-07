@@ -1,6 +1,9 @@
+size-plugin.json
+
 *.ico
 *.snap
 *.svg
 
 node_modules
 build
+gh-local

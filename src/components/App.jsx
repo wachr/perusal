@@ -46,7 +46,7 @@ export default function App() {
         <ThemeProvider theme={theme}>
           <AppBar>
             <Box>
-              <Link to={"/"}>
+              <Link to={"."}>
                 <ButtonBase size={"small"}>
                   <Stack>
                     <img

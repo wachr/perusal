@@ -28,7 +28,7 @@
       "version": "detect"
     },
     "import/resolver": {
-      "webpack" : {
+      "webpack": {
         "config": {
           "resolve": {
             "extensions": [".js", ".jsx", ".css"]
