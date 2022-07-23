@@ -1,6 +1,7 @@
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import Button from "@mui/material/Button";
+import ButtonGroup from "@mui/material/ButtonGroup";
 import Typography from "@mui/material/Typography";
 import { fileOpen, fileSave } from "browser-fs-access";
 import DOMPurify from "dompurify";
@@ -30,14 +31,16 @@ const FileStorage = ({ nodeState, setNode }) => {
   const stateString = JSON.stringify(nodeState, null, "\t");
   return (
     <div data-testid="FileStorage-div">
-      <Button onClick={() => handleImport(setNode)}>
-        <FileUploadIcon />
-        <Typography variant="button">Import State</Typography>
-      </Button>
-      <Button onClick={() => handleExport(stateString)}>
-        <FileDownloadIcon />
-        <Typography variant="button">Export State</Typography>
-      </Button>
+      <ButtonGroup size="small" sx={{ height: '100%' }}>
+        <Button onClick={() => handleImport(setNode)}>
+          <FileUploadIcon />
+          <Typography variant="button">Import State</Typography>
+        </Button>
+        <Button onClick={() => handleExport(stateString)}>
+          <FileDownloadIcon />
+          <Typography variant="button">Export State</Typography>
+        </Button>
+      </ButtonGroup>
     </div >
   );
 };
