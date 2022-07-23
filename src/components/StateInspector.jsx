@@ -1,39 +1,15 @@
-import { h } from "preact";
-import { useState } from "preact/hooks";
-
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import FileDownloadIcon from "@mui/icons-material/FileDownload";
-import FileUploadIcon from "@mui/icons-material/FileUpload";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
-import Typography from "@mui/material/Typography";
-import { fileOpen, fileSave } from "browser-fs-access";
-import DOMPurify from "dompurify";
+import { useState } from "preact/hooks";
 import PropTypes from "prop-types";
+import FileStorage from "./FileStorage";
+import GistStorage from "./GistStorage";
 
-const handleImport = async (setState) => {
-  const stateBlob = await fileOpen({
-    mimeTypes: ["application/json"],
-    extensions: [".json"],
-    startIn: "Downloads",
-  });
-  const fileContents = await stateBlob.text();
-  const cleanedContents = DOMPurify.sanitize(fileContents);
-  setState(JSON.parse(cleanedContents));
-};
-
-const handleExport = async (state) => {
-  const stateBlob = new Blob([state], { type: "application/json" });
-  await fileSave(stateBlob, {
-    fileName: "state.json",
-    extensions: [".json"],
-    startIn: "Downloads",
-  });
-};
 
 const StateInspector = ({ nodeState, setNode }) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -47,17 +23,11 @@ const StateInspector = ({ nodeState, setNode }) => {
               sx={{
                 display: "flex",
                 flexDirection: "row-reverse",
-                marginRight: "-5pt",
+                marginRight: "-5pt"
               }}>
               <ButtonGroup size="small">
-                <Button onClick={() => handleImport(setNode)}>
-                  <FileUploadIcon />
-                  <Typography variant="button">Import State</Typography>
-                </Button>
-                <Button onClick={() => handleExport(stateString)}>
-                  <FileDownloadIcon />
-                  <Typography variant="button">Export State</Typography>
-                </Button>
+                <GistStorage nodeState={nodeState} setNode={setNode} />
+                <FileStorage nodeState={nodeState} setNode={setNode} />
                 <Button
                   onClick={() => setCollapsed(!collapsed)}
                   aria-label="show or hide state">
