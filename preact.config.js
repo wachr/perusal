@@ -10,6 +10,11 @@ export default {
     const { plugin } = helpers.getPluginsByName(config, "DefinePlugin")[0];
     Object.assign(plugin.definitions, { "process.env.GITHUB_PAGES": ghEnv });
 
+    // If Windows, use polling to work around filesystem limitations
+    // https://webpack.js.org/configuration/watch/#watchoptionspoll
+    if (process.platform === 'win32')
+      config.devServer.watchOptions.poll = 1500;
+
     if (!config.resolve) config.resolve = {};
     if (!config.resolve.alias) config.resolve.alias = {};
     const prevAliases = config.resolve.alias;
