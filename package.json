@@ -14,7 +14,8 @@
     "lint:check": "eslint src",
     "serve": "sirv build --port 8080 --cors --single",
     "serve:gh": "sirv gh-local --port 8080 --cors --single",
-    "test": "jest"
+    "test": "jest",
+    "watch": "onchange --initial . --exclude-path .gitignore -- prettier --write . && eslint . --fix; echo {{event}} to {{file}}"
   },
   "eslintConfig": {
     "extends": "preact"
@@ -40,6 +41,7 @@
     "eslint-plugin-jest": "^23.20.0",
     "eslint-plugin-react": "^7.28.0",
     "jest": "^27.4.5",
+    "onchange": "^7.1.0",
     "preact-cli": "^3.0.0",
     "prettier": "2.5.1",
     "sirv-cli": "^1.0.3"

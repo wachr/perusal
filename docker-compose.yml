@@ -1,0 +1,19 @@
+services:
+  dev-server:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - USE_NFS_POLLING=${USE_NFS_POLLING:-false}
+    volumes:
+      - .:/home/node/perusal
+  watcher:
+    build: .
+    volumes:
+      - .:/home/node/perusal
+    environment:
+      - CHOKIDAR_USEPOLLING=${CHOKIDAR_USEPOLLING:-0}
+      - CHOKIDAR_INTERVAL
+    command: ["watch"]
+    profiles:
+      - watch
