@@ -129,7 +129,9 @@ module.exports = {
   // runner: "jest-runner",
 
   // The paths to modules that run some code to configure or set up the testing environment before each test
-  // setupFiles: [],
+  setupFiles: [
+    "jsdom-worker", // Copied from https://github.com/jsdom/jsdom/issues/1721#issuecomment-1080025653
+  ],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
   setupFilesAfterEnv: ["<rootDir>/jest-setup.js"],
