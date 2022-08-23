@@ -10,6 +10,7 @@ import TextField from "@mui/material/TextField";
 import PropTypes from "prop-types";
 
 import FileStorage from "./FileStorage";
+import GistStorage from "./GistStorage";
 
 const StateInspector = ({ nodeState, setNode }) => {
   const [collapsed, setCollapsed] = useState(false);
@@ -31,6 +32,7 @@ const StateInspector = ({ nodeState, setNode }) => {
                 {collapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
               </Button>
               <FileStorage nodeState={nodeState} setNode={setNode} />
+              <GistStorage nodeState={nodeState} setNode={setNode} />
             </Box>
             {!collapsed && (
               <TextField
