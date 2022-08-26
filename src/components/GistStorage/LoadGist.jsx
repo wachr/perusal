@@ -8,7 +8,7 @@ const LoadGist = ({ accessToken, gistId, setNode }) => {
   const updateNodeStateFromGist = async () => {
     await fetch(`https://api.github.com/gists/${gistId}`, {
       headers: {
-        "content-type": "application/json",
+        accept: "application/json",
         authorization: `Bearer ${accessToken}`,
       },
     })

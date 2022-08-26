@@ -15,19 +15,9 @@ import PropTypes from "prop-types";
 
 import GistIdInput from "./GistIdInput";
 import LoadGist from "./LoadGist";
+import SaveGist from "./SaveGist";
 import TokenControls from "./TokenControls";
 import UniqueDialogId from "./UniqueDialogId";
-
-const SaveGist = () => {
-  const updateGistFromNodeState = () => {
-    alert("not yet implemented");
-  };
-  return (
-    <Button onClick={updateGistFromNodeState}>
-      <Typography variant="button">Save to Gist</Typography>
-    </Button>
-  );
-};
 
 const StubGist = () => {
   const stubOutGist = () => {
@@ -77,7 +67,11 @@ const GistStorage = ({ nodeState, setNode }) => {
           </FormGroup>
         </DialogContent>
         <DialogActions>
-          <SaveGist />
+          <SaveGist
+            accessToken={accessToken}
+            gistId={gistId}
+            nodeState={nodeState}
+          />
           <LoadGist
             accessToken={accessToken}
             gistId={gistId}
