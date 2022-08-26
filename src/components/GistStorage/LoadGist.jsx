@@ -19,8 +19,6 @@ const LoadGist = ({ accessToken, gistId, setNode }) => {
             .then((json) => json.files["perusal_state.json"].content)
             .then(JSON.parse)
             .then(setNode);
-        } else {
-          alert(res);
         }
       })
       .catch((err) => console.log(err));

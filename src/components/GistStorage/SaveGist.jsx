@@ -17,7 +17,7 @@ const serializeNodeState = (nodeState) => {
   return stringify(body);
 };
 
-const SaveGist = ({ accessToken, gistId, nodeState }) => {
+const SaveGist = ({ accessToken, gistId, nodeState, success }) => {
   const updateGistFromNodeState = async () => {
     const serializedState = serializeNodeState(nodeState);
     await fetch(`https://api.github.com/gists/${gistId}`, {
@@ -28,11 +28,7 @@ const SaveGist = ({ accessToken, gistId, nodeState }) => {
       },
       body: serializedState,
     })
-      .then((res) => {
-        if (res.status !== 200) {
-          console.log(res);
-        }
-      })
+      .then((res) => (res.status !== 200 ? console.log(res) : success()))
       .catch((err) => console.log(err));
   };
   return (
@@ -50,6 +46,7 @@ SaveGist.propTypes = {
     PropTypes.array,
     PropTypes.string,
   ]).isRequired,
+  success: PropTypes.func.isRequired,
 };
 
 export default SaveGist;

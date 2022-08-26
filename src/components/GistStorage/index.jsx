@@ -16,19 +16,9 @@ import PropTypes from "prop-types";
 import GistIdInput from "./GistIdInput";
 import LoadGist from "./LoadGist";
 import SaveGist from "./SaveGist";
+import StubGist from "./StubGist";
 import TokenControls from "./TokenControls";
 import UniqueDialogId from "./UniqueDialogId";
-
-const StubGist = () => {
-  const stubOutGist = () => {
-    alert("not yet implemented");
-  };
-  return (
-    <Button onClick={stubOutGist}>
-      <Typography variant="button">Create new Perusal Gist</Typography>
-    </Button>
-  );
-};
 
 const GistStorage = ({ nodeState, setNode }) => {
   const [open, setOpen] = useState(false);
@@ -71,13 +61,23 @@ const GistStorage = ({ nodeState, setNode }) => {
             accessToken={accessToken}
             gistId={gistId}
             nodeState={nodeState}
+            success={() => setOpen(false)}
           />
           <LoadGist
             accessToken={accessToken}
             gistId={gistId}
-            setNode={setNode}
+            setNode={(node) => {
+              setNode(node);
+              setOpen(false);
+            }}
           />
-          <StubGist />
+          <StubGist
+            accessToken={accessToken}
+            setGistId={(id) => {
+              setGistId(id);
+              setOpen(false);
+            }}
+          />
         </DialogActions>
       </Dialog>
     </div>
