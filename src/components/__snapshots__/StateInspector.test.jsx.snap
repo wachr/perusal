@@ -16,81 +16,136 @@ exports[`StateInspector should render properly 1`] = `
         <div
           class="MuiBox-root css-d3kwzx"
         >
-          <div
-            class="MuiButtonGroup-root MuiButtonGroup-outlined css-iajp3t-MuiButtonGroup-root"
-            role="group"
+          <button
+            aria-label="show or hide state"
+            class="MuiButton-root MuiButton-text MuiButton-textPrimary MuiButton-sizeMedium MuiButton-textSizeMedium MuiButtonBase-root  css-1e6y48t-MuiButtonBase-root-MuiButton-root"
+            tabindex="0"
+            type="button"
           >
-            <button
-              class="MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButtonBase-root MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedOutlined MuiButtonGroup-groupedOutlinedHorizontal MuiButtonGroup-groupedOutlinedPrimary MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedOutlined MuiButtonGroup-groupedOutlinedHorizontal MuiButtonGroup-groupedOutlinedPrimary css-1k23hlb-MuiButtonBase-root-MuiButton-root"
-              tabindex="0"
-              type="button"
+            <svg
+              aria-hidden="true"
+              class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+              data-testid="ExpandLessIcon"
+              focusable="false"
+              viewBox="0 0 24 24"
             >
-              <svg
-                aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
-                data-testid="FileUploadIcon"
-                focusable="false"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"
-                />
-              </svg>
-              <span
-                class="MuiTypography-root MuiTypography-button css-1f0on15-MuiTypography-root"
-              >
-                Import State
-              </span>
-              <span
-                class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
+              <path
+                d="m12 8-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"
               />
-            </button>
-            <button
-              class="MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButtonBase-root MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedOutlined MuiButtonGroup-groupedOutlinedHorizontal MuiButtonGroup-groupedOutlinedPrimary MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedOutlined MuiButtonGroup-groupedOutlinedHorizontal MuiButtonGroup-groupedOutlinedPrimary css-1k23hlb-MuiButtonBase-root-MuiButton-root"
-              tabindex="0"
-              type="button"
+            </svg>
+            <span
+              class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
+            />
+          </button>
+          <div
+            data-testid="FileStorage-div"
+          >
+            <div
+              class="MuiButtonGroup-root MuiButtonGroup-outlined css-uxh582-MuiButtonGroup-root"
+              role="group"
             >
-              <svg
-                aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
-                data-testid="FileDownloadIcon"
-                focusable="false"
-                viewBox="0 0 24 24"
+              <button
+                class="MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButtonBase-root MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedOutlined MuiButtonGroup-groupedOutlinedHorizontal MuiButtonGroup-groupedOutlinedPrimary MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedOutlined MuiButtonGroup-groupedOutlinedHorizontal MuiButtonGroup-groupedOutlinedPrimary css-1k23hlb-MuiButtonBase-root-MuiButton-root"
+                tabindex="0"
+                type="button"
               >
-                <path
-                  d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+                  data-testid="FileUploadIcon"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"
+                  />
+                </svg>
+                <span
+                  class="MuiTypography-root MuiTypography-button css-1f0on15-MuiTypography-root"
+                >
+                  Import State
+                </span>
+                <span
+                  class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
                 />
-              </svg>
-              <span
-                class="MuiTypography-root MuiTypography-button css-1f0on15-MuiTypography-root"
+              </button>
+              <button
+                class="MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButtonBase-root MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedOutlined MuiButtonGroup-groupedOutlinedHorizontal MuiButtonGroup-groupedOutlinedPrimary MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedOutlined MuiButtonGroup-groupedOutlinedHorizontal MuiButtonGroup-groupedOutlinedPrimary css-1k23hlb-MuiButtonBase-root-MuiButton-root"
+                tabindex="0"
+                type="button"
               >
-                Export State
-              </span>
-              <span
-                class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-              />
-            </button>
-            <button
-              aria-label="show or hide state"
-              class="MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButtonBase-root MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedOutlined MuiButtonGroup-groupedOutlinedHorizontal MuiButtonGroup-groupedOutlinedPrimary MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedOutlined MuiButtonGroup-groupedOutlinedHorizontal MuiButtonGroup-groupedOutlinedPrimary css-1k23hlb-MuiButtonBase-root-MuiButton-root"
-              tabindex="0"
-              type="button"
+                <svg
+                  aria-hidden="true"
+                  class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
+                  data-testid="FileDownloadIcon"
+                  focusable="false"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"
+                  />
+                </svg>
+                <span
+                  class="MuiTypography-root MuiTypography-button css-1f0on15-MuiTypography-root"
+                >
+                  Export State
+                </span>
+                <span
+                  class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
+                />
+              </button>
+            </div>
+          </div>
+          <div
+            data-testid="GistStorage-div"
+          >
+            <div
+              class="MuiButtonGroup-root MuiButtonGroup-outlined css-uxh582-MuiButtonGroup-root"
+              role="group"
             >
-              <svg
-                aria-hidden="true"
-                class="MuiSvgIcon-root MuiSvgIcon-fontSizeMedium css-i4bv87-MuiSvgIcon-root"
-                data-testid="ExpandLessIcon"
-                focusable="false"
-                viewBox="0 0 24 24"
+              <button
+                class="MuiButton-root MuiButton-outlined MuiButton-outlinedPrimary MuiButton-sizeSmall MuiButton-outlinedSizeSmall MuiButtonBase-root MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedOutlined MuiButtonGroup-groupedOutlinedHorizontal MuiButtonGroup-groupedOutlinedPrimary MuiButtonGroup-grouped MuiButtonGroup-groupedHorizontal MuiButtonGroup-groupedOutlined MuiButtonGroup-groupedOutlinedHorizontal MuiButtonGroup-groupedOutlinedPrimary css-1k23hlb-MuiButtonBase-root-MuiButton-root"
+                tabindex="0"
+                type="button"
               >
-                <path
-                  d="m12 8-6 6 1.41 1.41L12 10.83l4.59 4.58L18 14z"
+                <span
+                  class="MuiTypography-root MuiTypography-button css-1f0on15-MuiTypography-root"
+                >
+                  Use Gists
+                </span>
+                <span
+                  class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
                 />
-              </svg>
-              <span
-                class="MuiTouchRipple-root css-8je8zh-MuiTouchRipple-root"
-              />
-            </button>
+              </button>
+            </div>
+            <div
+              class="MuiFormControl-root MuiTextField-root css-1u3bzj6-MuiFormControl-root-MuiTextField-root"
+            >
+              <div
+                class="MuiOutlinedInput-root MuiInputBase-root MuiInputBase-colorPrimary MuiInputBase-formControl css-9ddj71-MuiInputBase-root-MuiOutlinedInput-root"
+              >
+                <input
+                  aria-invalid="false"
+                  class="MuiOutlinedInput-input MuiInputBase-input css-1t8l2tu-MuiInputBase-input-MuiOutlinedInput-input"
+                  id="mui-1"
+                  type="text"
+                />
+                <fieldset
+                  aria-hidden="true"
+                  class="MuiOutlinedInput-notchedOutline css-1d3z3hw-MuiOutlinedInput-notchedOutline"
+                >
+                  <legend
+                    class="css-nnbavb"
+                  >
+                    <span
+                      class="notranslate"
+                    >
+                      ​
+                    </span>
+                  </legend>
+                </fieldset>
+              </div>
+            </div>
           </div>
         </div>
         <div
@@ -100,8 +155,8 @@ exports[`StateInspector should render properly 1`] = `
           <label
             class="MuiInputLabel-root MuiInputLabel-formControl MuiInputLabel-animated MuiInputLabel-shrink MuiInputLabel-outlined MuiFormLabel-root MuiFormLabel-colorPrimary MuiFormLabel-filled css-1kty9di-MuiFormLabel-root-MuiInputLabel-root"
             data-shrink="true"
-            for="mui-1"
-            id="mui-1-label"
+            for="mui-3"
+            id="mui-3-label"
           >
             app state
           </label>
@@ -111,7 +166,7 @@ exports[`StateInspector should render properly 1`] = `
             <textarea
               aria-invalid="false"
               class="MuiOutlinedInput-input MuiInputBase-input MuiInputBase-inputMultiline css-1sqnrkk-MuiInputBase-input-MuiOutlinedInput-input"
-              id="mui-1"
+              id="mui-3"
               readonly=""
               style="height: 0px; overflow: hidden;"
             />

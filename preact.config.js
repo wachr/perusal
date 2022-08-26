@@ -1,5 +1,5 @@
 export default {
-  webpack(config, env, helpers, options) {
+  webpack(config, env, helpers) {
     const publicPath = process.env.GITHUB_PAGES
       ? `/${process.env.GITHUB_PAGES}/`
       : "/";
@@ -9,6 +9,10 @@ export default {
       process.env.GITHUB_PAGES && JSON.stringify(`${process.env.GITHUB_PAGES}`);
     const { plugin } = helpers.getPluginsByName(config, "DefinePlugin")[0];
     Object.assign(plugin.definitions, { "process.env.GITHUB_PAGES": ghEnv });
+
+    // Conditionally use polling to work around filesystem limitations
+    // https://webpack.js.org/configuration/watch/#watchoptionspoll
+    if (process.env.USE_NFS_POLLING) config.devServer.watchOptions.poll = 1500;
 
     if (!config.resolve) config.resolve = {};
     if (!config.resolve.alias) config.resolve.alias = {};
