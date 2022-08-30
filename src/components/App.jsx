@@ -12,6 +12,7 @@ import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 
+import Perusal from "./Perusal";
 import StateInspector from "./StateInspector";
 
 const theme = createTheme({
@@ -61,7 +62,7 @@ export default function App() {
             </Box>
           </AppBar>
           <Toolbar />
-          <Typography variant="h1">Hello, World!</Typography>
+          <Perusal nodeState={appState} setNode={setAppState} />
           <StateInspector nodeState={appState} setNode={setAppState} />
         </ThemeProvider>
       </Router>
