@@ -1,5 +1,6 @@
 import { h } from "preact";
 
+import Types from "../utils/Types";
 import FileDownloadIcon from "@mui/icons-material/FileDownload";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
 import Button from "@mui/material/Button";
@@ -46,11 +47,7 @@ const FileStorage = ({ nodeState, setNode }) => {
 };
 
 FileStorage.propTypes = {
-  nodeState: PropTypes.oneOfType([
-    PropTypes.shape(),
-    PropTypes.array,
-    PropTypes.string,
-  ]).isRequired,
+  nodeState: Types.nodeState.isRequired,
   setNode: PropTypes.func.isRequired,
 };
 

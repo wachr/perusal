@@ -1,6 +1,7 @@
 import { h } from "preact";
 import { useState } from "preact/hooks";
 
+import Types from "../../utils/Types";
 import Button from "@mui/material/Button";
 import ButtonGroup from "@mui/material/ButtonGroup";
 import Dialog from "@mui/material/Dialog";
@@ -85,11 +86,7 @@ const GistStorage = ({ nodeState, setNode }) => {
 };
 
 GistStorage.propTypes = {
-  nodeState: PropTypes.oneOfType([
-    PropTypes.shape(),
-    PropTypes.array,
-    PropTypes.string,
-  ]).isRequired,
+  nodeState: Types.nodeState.isRequired,
   setNode: PropTypes.func.isRequired,
 };
 

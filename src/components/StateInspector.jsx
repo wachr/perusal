@@ -1,6 +1,7 @@
 import { h } from "preact";
 import { useState } from "preact/hooks";
 
+import Types from "../utils/Types";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Box from "@mui/material/Box";
@@ -56,11 +57,7 @@ const StateInspector = ({ nodeState, setNode }) => {
 };
 
 StateInspector.propTypes = {
-  nodeState: PropTypes.oneOfType([
-    PropTypes.shape(),
-    PropTypes.array,
-    PropTypes.string,
-  ]).isRequired,
+  nodeState: Types.nodeState.isRequired,
   setNode: PropTypes.func.isRequired,
 };
 

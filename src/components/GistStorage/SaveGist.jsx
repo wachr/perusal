@@ -1,5 +1,6 @@
 import { h } from "preact";
 
+import Types from "../../utils/Types";
 import Button from "@mui/material/Button";
 import Typography from "@mui/material/Typography";
 import PropTypes from "prop-types";
@@ -41,11 +42,7 @@ const SaveGist = ({ accessToken, gistId, nodeState, success }) => {
 SaveGist.propTypes = {
   accessToken: PropTypes.string.isRequired,
   gistId: PropTypes.string.isRequired,
-  nodeState: PropTypes.oneOfType([
-    PropTypes.shape(),
-    PropTypes.array,
-    PropTypes.string,
-  ]).isRequired,
+  nodeState: Types.nodeState.isRequired,
   success: PropTypes.func.isRequired,
 };
 
