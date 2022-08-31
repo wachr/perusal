@@ -22,10 +22,18 @@ export function isEmpty(nodeState) {
   return false;
 }
 
+export function onString(stringTransform, unitValue) {
+  return (nodeState) => {
+    if (typeof nodeState === "string") return stringTransform(nodeState);
+    return unitValue;
+  };
+}
+
 const TopicContent = ({ nodeState, setNode }) => {
   function selectContent(nodeState) {
-    if (typeof nodeState === "string")
-      return <Typography variant="h1">{nodeState}</Typography>;
+    return onString((nodeState) => (
+      <Typography variant="h1">{nodeState}</Typography>
+    ))(nodeState);
   }
   const content = selectContent(nodeState);
   return <CardContent>{content}</CardContent>;
@@ -37,7 +45,9 @@ const TopicCard = ({ nodeState, setNode }) => {
       return (
         <Fragment>
           <EditTopicButton topic={nodeState} setTopic={setNode} />
-          <RemoveTopicButton removeTopic={() => alert("not yet implemented")} />
+          <RemoveTopicButton
+            removeTopic={() => onString(() => setNode({}))(nodeState)}
+          />
         </Fragment>
       );
   };
