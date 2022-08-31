@@ -1,4 +1,4 @@
-import { h } from "preact";
+import { Fragment, h } from "preact";
 import { useState } from "preact/hooks";
 
 import Types from "../../utils/Types";
@@ -6,51 +6,54 @@ import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
 import Paper from "@mui/material/Paper";
-import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import PropTypes from "prop-types";
 
 import AddTopicButton from "./AddTopicButton";
+import EditTopicButton from "./EditTopicButton";
+import RemoveTopicButton from "./RemoveTopicButton";
+
+export function isEmpty(nodeState) {
+  if (!nodeState) return true;
+  if (typeof nodeState === "string" && nodeState === "") return true;
+  if (Array.isArray(nodeState) && nodeState.length === 0) return true;
+  if (typeof nodeState === "object" && Object.entries(nodeState).length === 0)
+    return true;
+  return false;
+}
 
 const TopicContent = ({ nodeState, setNode }) => {
   function selectContent(nodeState) {
     if (typeof nodeState === "string")
       return <Typography variant="h1">{nodeState}</Typography>;
-    if (Array.isArray(nodeState))
-      return (
-        <Stack>
-          {nodeState.map((node) => (
-            <TopicCard
-              nodeState={node}
-              // TODO Implement array lens for setNode here
-              setNode={() => alert("not yet implemented")}
-            />
-          ))}
-        </Stack>
-      );
   }
   const content = selectContent(nodeState);
   return <CardContent>{content}</CardContent>;
 };
 
 const TopicCard = ({ nodeState, setNode }) => {
+  const NonEmptyActions = () => {
+    if (!isEmpty(nodeState))
+      return (
+        <Fragment>
+          <EditTopicButton topic={nodeState} setTopic={setNode} />
+          <RemoveTopicButton removeTopic={() => alert("not yet implemented")} />
+        </Fragment>
+      );
+  };
   return (
     <Card>
       <TopicContent nodeState={nodeState} setNode={setNode} />
       <CardActions>
         <AddTopicButton
           addTopic={(topic) => {
-            if (!nodeState || Object.entries(nodeState).length === 0) {
+            if (isEmpty(nodeState)) {
               setNode(topic);
               return;
             }
-            if (Array.isArray(nodeState)) {
-              setNode([...nodeState, topic]);
-              return;
-            }
-            setNode([nodeState, topic]);
           }}
         />
+        <NonEmptyActions />
       </CardActions>
     </Card>
   );
