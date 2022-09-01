@@ -12,30 +12,20 @@ import PropTypes from "prop-types";
 import AddTopicButton from "./AddTopicButton";
 import EditTopicButton from "./EditTopicButton";
 import RemoveTopicButton from "./RemoveTopicButton";
-
-export function isEmpty(nodeState) {
-  if (!nodeState) return true;
-  if (typeof nodeState === "string" && nodeState === "") return true;
-  if (Array.isArray(nodeState) && nodeState.length === 0) return true;
-  if (typeof nodeState === "object" && Object.entries(nodeState).length === 0)
-    return true;
-  return false;
-}
-
-export function onString(stringTransform, unitValue) {
-  return (nodeState) => {
-    if (typeof nodeState === "string") return stringTransform(nodeState);
-    return unitValue;
-  };
-}
+import { combine, isEmpty, onArray, onEmpty, onString } from "./ops";
 
 const TopicContent = ({ nodeState, setNode }) => {
-  function selectContent(nodeState) {
-    return onString((nodeState) => (
-      <Typography variant="h1">{nodeState}</Typography>
-    ))(nodeState);
-  }
-  const content = selectContent(nodeState);
+  const content = combine(
+    onString((nodeState) => <Typography variant="h1">{nodeState}</Typography>),
+    onArray((arr) =>
+      Array.from(arr).map((topic) => (
+        <TopicCard
+          nodeState={topic}
+          setNode={() => alert("not yet implemented")}
+        />
+      ))
+    )
+  )(nodeState);
   return <CardContent>{content}</CardContent>;
 };
 
@@ -46,7 +36,12 @@ const TopicCard = ({ nodeState, setNode }) => {
         <Fragment>
           <EditTopicButton topic={nodeState} setTopic={setNode} />
           <RemoveTopicButton
-            removeTopic={() => onString(() => setNode({}))(nodeState)}
+            removeTopic={() =>
+              combine(
+                onString(() => setNode({}))
+                // onArray((arr) => arr.slice(0, arr.length - 1))
+              )(nodeState)
+            }
           />
         </Fragment>
       );
@@ -57,10 +52,11 @@ const TopicCard = ({ nodeState, setNode }) => {
       <CardActions>
         <AddTopicButton
           addTopic={(topic) => {
-            if (isEmpty(nodeState)) {
-              setNode(topic);
-              return;
-            }
+            combine(
+              onEmpty(() => setNode(topic)),
+              onString(() => setNode([nodeState, topic])),
+              onArray(() => setNode([...nodeState, topic]))
+            )(nodeState);
           }}
         />
         <NonEmptyActions />
