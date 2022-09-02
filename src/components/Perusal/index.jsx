@@ -1,5 +1,4 @@
 import { Fragment, h } from "preact";
-import { useState } from "preact/hooks";
 
 import Types from "../../utils/Types";
 import Card from "@mui/material/Card";
@@ -18,10 +17,17 @@ const TopicContent = ({ nodeState, setNode }) => {
   const content = combine(
     onString((nodeState) => <Typography variant="h1">{nodeState}</Typography>),
     onArray((arr) =>
-      Array.from(arr).map((topic) => (
+      Array.from(arr).map((topic, index) => (
         <TopicCard
           nodeState={topic}
-          setNode={() => alert("not yet implemented")}
+          setNode={(topic) =>
+            setNode((draft) => {
+              if (isEmpty(topic)) {
+                if (draft.length === 2) return draft[index === 1 ? 0 : 1];
+                draft.splice(index, 1);
+              } else draft.splice(index, 1, topic);
+            })
+          }
         />
       ))
     )
@@ -39,8 +45,8 @@ const TopicCard = ({ nodeState, setNode }) => {
             disabled={onString(() => false, true)(nodeState)}
             removeTopic={() =>
               combine(
-                onString(() => setNode({}))
-                // onArray((arr) => arr.slice(0, arr.length - 1))
+                onString(() => setNode({})),
+                onArray(() => setNode({}))
               )(nodeState)
             }
           />
