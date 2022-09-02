@@ -36,6 +36,7 @@ const TopicCard = ({ nodeState, setNode }) => {
         <Fragment>
           <EditTopicButton topic={nodeState} setTopic={setNode} />
           <RemoveTopicButton
+            disabled={onString(() => false, true)(nodeState)}
             removeTopic={() =>
               combine(
                 onString(() => setNode({}))

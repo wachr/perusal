@@ -2,6 +2,7 @@ import { h } from "preact";
 
 import Types from "../../utils/Types";
 import SaveIcon from "@mui/icons-material/CheckCircleTwoTone";
+import EditOffIcon from "@mui/icons-material/EditOffTwoTone";
 import EditIcon from "@mui/icons-material/EditTwoTone";
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
@@ -9,7 +10,7 @@ import TextField from "@mui/material/TextField";
 import PropTypes from "prop-types";
 import { useImmer } from "use-immer";
 
-import { onString } from "./ops";
+import { combine, onArray, onString } from "./ops";
 
 const StringEditButton = ({ topic, setTopic }) => {
   const [edit, setEdit] = useImmer(false);
@@ -39,10 +40,19 @@ const StringEditButton = ({ topic, setTopic }) => {
   );
 };
 
+const ArrayEditButton = () => {
+  return (
+    <Button>
+      <EditOffIcon />
+    </Button>
+  );
+};
+
 const EditTopicButton = ({ topic, setTopic }) => {
-  return onString((topic) => (
-    <StringEditButton topic={topic} setTopic={setTopic} />
-  ))(topic);
+  return combine(
+    onString((topic) => <StringEditButton topic={topic} setTopic={setTopic} />),
+    onArray(() => <ArrayEditButton />)
+  )(topic);
 };
 
 EditTopicButton.propTypes = {

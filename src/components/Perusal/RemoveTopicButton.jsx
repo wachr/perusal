@@ -1,19 +1,25 @@
 import { h } from "preact";
 
-import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
+import DeleteDisabledIcon from "@mui/icons-material/DeleteOutlineTwoTone";
+import DeleteIcon from "@mui/icons-material/DeleteTwoTone";
 import Button from "@mui/material/Button";
 import PropTypes from "prop-types";
 
-const RemoveTopicButton = ({ removeTopic }) => {
+const RemoveTopicButton = ({ disabled, removeTopic }) => {
   return (
     <Button onClick={removeTopic}>
-      <DeleteTwoToneIcon />
+      {disabled ? <DeleteDisabledIcon /> : <DeleteIcon />}
     </Button>
   );
 };
 
 RemoveTopicButton.propTypes = {
+  disabled: PropTypes.bool,
   removeTopic: PropTypes.func.isRequired,
+};
+
+RemoveTopicButton.defaultProps = {
+  disabled: false,
 };
 
 export default RemoveTopicButton;
