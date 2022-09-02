@@ -1,14 +1,14 @@
 import { h } from "preact";
-import { useState } from "preact/hooks";
 
 import Button from "@mui/material/Button";
 import FilledInput from "@mui/material/FilledInput";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import PropTypes from "prop-types";
+import { useImmer } from "use-immer";
 
 const GistIdInput = ({ id, setId }) => {
-  const [idField, setIdField] = useState(id);
+  const [idField, setIdField] = useImmer(id);
   const setField = () => setId(idField);
   const resetField = () => {
     setId("");

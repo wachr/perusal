@@ -1,5 +1,4 @@
 import { h } from "preact";
-import { useState } from "preact/hooks";
 import { BrowserRouter, Link } from "react-router-dom";
 import { StaticRouter } from "react-router-dom/server";
 
@@ -11,6 +10,7 @@ import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { useImmer } from "use-immer";
 
 import Perusal from "./Perusal";
 import StateInspector from "./StateInspector";
@@ -40,7 +40,7 @@ const Router = (props) => {
 };
 
 export default function App() {
-  const [appState, setAppState] = useState({});
+  const [appState, setAppState] = useImmer({});
   return (
     <div id="App">
       <Router basename={baseroute}>

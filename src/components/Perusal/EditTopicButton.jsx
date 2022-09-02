@@ -1,5 +1,4 @@
 import { h } from "preact";
-import { useState } from "preact/hooks";
 
 import Types from "../../utils/Types";
 import SaveIcon from "@mui/icons-material/CheckCircleTwoTone";
@@ -8,12 +7,13 @@ import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
 import TextField from "@mui/material/TextField";
 import PropTypes from "prop-types";
+import { useImmer } from "use-immer";
 
 import { onString } from "./ops";
 
 const StringEditButton = ({ topic, setTopic }) => {
-  const [edit, setEdit] = useState(false);
-  const [editField, setEditField] = useState(topic);
+  const [edit, setEdit] = useImmer(false);
+  const [editField, setEditField] = useImmer(topic);
   if (edit)
     return (
       <Container>

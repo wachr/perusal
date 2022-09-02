@@ -1,5 +1,4 @@
 import { h } from "preact";
-import { useState } from "preact/hooks";
 
 import Button from "@mui/material/Button";
 import Container from "@mui/material/Container";
@@ -7,11 +6,12 @@ import TextField from "@mui/material/TextField";
 import { nolookalikesSafe } from "nanoid-dictionary";
 import { customAlphabet } from "nanoid/non-secure";
 import PropTypes from "prop-types";
+import { useImmer } from "use-immer";
 
 const AddTopicButton = ({ addTopic }) => {
-  const [edit, setEdit] = useState(false);
+  const [edit, setEdit] = useImmer(false);
   const genInput = () => customAlphabet(nolookalikesSafe, 1);
-  const [addTopicField, setAddTopicField] = useState("");
+  const [addTopicField, setAddTopicField] = useImmer("");
   if (edit)
     return (
       <Container>

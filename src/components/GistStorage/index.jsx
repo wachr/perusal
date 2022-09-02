@@ -1,5 +1,4 @@
 import { h } from "preact";
-import { useState } from "preact/hooks";
 
 import Types from "../../utils/Types";
 import Button from "@mui/material/Button";
@@ -13,6 +12,7 @@ import FormGroup from "@mui/material/FormGroup";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import PropTypes from "prop-types";
+import { useImmer } from "use-immer";
 
 import GistIdInput from "./GistIdInput";
 import LoadGist from "./LoadGist";
@@ -22,10 +22,10 @@ import TokenControls from "./TokenControls";
 import UniqueDialogId from "./UniqueDialogId";
 
 const GistStorage = ({ nodeState, setNode }) => {
-  const [open, setOpen] = useState(false);
-  const [accessToken, setAccessToken] = useState("");
-  const [gistId, setGistId] = useState("");
-  const [openId, setOpenId] = useState("");
+  const [open, setOpen] = useImmer(false);
+  const [accessToken, setAccessToken] = useImmer("");
+  const [gistId, setGistId] = useImmer("");
+  const [openId, setOpenId] = useImmer("");
 
   const handleDialogClose = () => {
     setOpen(false);
