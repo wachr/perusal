@@ -20,12 +20,13 @@ const TopicContent = ({ nodeState, setNode }) => {
       Array.from(arr).map((topic, index) => (
         <TopicCard
           nodeState={topic}
-          setNode={(topic) =>
+          setNode={(
+            topic // FIXME Need to handle update of nested arrays
+          ) => setNode((draft) => void draft.splice(index, 1, topic))}
+          removeNode={() =>
             setNode((draft) => {
-              if (isEmpty(topic)) {
-                if (draft.length === 2) return draft[index === 1 ? 0 : 1];
-                draft.splice(index, 1);
-              } else draft.splice(index, 1, topic);
+              if (draft.length === 2) return draft[index === 0 ? 1 : 0];
+              draft.splice(index, 1);
             })
           }
         />
@@ -35,7 +36,7 @@ const TopicContent = ({ nodeState, setNode }) => {
   return <CardContent>{content}</CardContent>;
 };
 
-const TopicCard = ({ nodeState, setNode }) => {
+const TopicCard = ({ nodeState, setNode, removeNode }) => {
   const NonEmptyActions = () => {
     if (!isEmpty(nodeState))
       return (
@@ -44,10 +45,7 @@ const TopicCard = ({ nodeState, setNode }) => {
           <RemoveTopicButton
             disabled={onString(() => false, true)(nodeState)}
             removeTopic={() =>
-              combine(
-                onString(() => setNode({})),
-                onArray(() => setNode({}))
-              )(nodeState)
+              typeof removeNode === "function" ? removeNode() : setNode({})
             }
           />
         </Fragment>
