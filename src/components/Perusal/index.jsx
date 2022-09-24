@@ -10,7 +10,8 @@ import Typography from "@mui/material/Typography";
 import PropTypes from "prop-types";
 
 import EmptyActions from "./EmptyActions";
-import { combine, isEmpty, onArray, onEmpty, onString } from "./ops";
+import { onString } from "./ops";
+import reducer from "./reducer";
 
 const StringContent = ({ nodeState, setNode }) =>
   onString(() => <Typography variant="h1">{nodeState}</Typography>)(nodeState);
@@ -40,6 +41,10 @@ const Perusal = ({ nodeState, setNode }) => {
     </div>
   );
 };
+
+Perusal.reducer = reducer;
+
+export * from "./reducer";
 
 Perusal.propTypes = {
   nodeState: Types.nodeState.isRequired,

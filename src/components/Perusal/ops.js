@@ -30,6 +30,8 @@ export function onArray(arrayTransform, unitValue = undefined) {
   };
 }
 
+// TODO export function onObject(objectTransform, unitValue = undefined) {}
+
 export function combine(...ops) {
   return (nodeState, unitValue = undefined) =>
     ops.reduce(

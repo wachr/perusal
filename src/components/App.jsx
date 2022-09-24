@@ -10,7 +10,7 @@ import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { useImmer } from "use-immer";
+import { useImmerReducer } from "use-immer";
 
 import Perusal from "./Perusal";
 import StateInspector from "./StateInspector";
@@ -40,7 +40,8 @@ const Router = (props) => {
 };
 
 export default function App() {
-  const [appState, setAppState] = useImmer({});
+  const [appState, dispatch] = useImmerReducer(Perusal.reducer, {});
+  const setAppState = (state) => dispatch({ payload: state });
   return (
     <div id="App">
       <Router basename={baseroute}>
