@@ -63,7 +63,11 @@ export default function App() {
             </Box>
           </AppBar>
           <Toolbar />
-          <Perusal nodeState={appState} setNode={setAppState} />
+          <Perusal
+            nodeState={appState}
+            dispatch={dispatch}
+            setNode={setAppState}
+          />
           <StateInspector nodeState={appState} setNode={setAppState} />
         </ThemeProvider>
       </Router>

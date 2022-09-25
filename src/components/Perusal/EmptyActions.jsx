@@ -1,4 +1,4 @@
-import { Fragment, h } from "preact";
+import { h } from "preact";
 import { useState } from "preact/hooks";
 
 import Types from "../../utils/Types";
@@ -17,7 +17,8 @@ const EmptyActions = ({ nodeState, setNode }) => {
   const [topicField, setTopicField] = useState("");
   const addString = (setNode, topic) => onString(() => setNode(topic))(topic);
   return onEmpty(() => (
-    <Fragment>
+    <Button onClick={() => setOpen(true)}>
+      Add topic
       <Dialog onClose={() => setOpen(false)} open={open}>
         <DialogTitle>New string topic</DialogTitle>
         <DialogContent>
@@ -40,8 +41,7 @@ const EmptyActions = ({ nodeState, setNode }) => {
           </Button>
         </DialogActions>
       </Dialog>
-      <Button onClick={() => setOpen(true)}> Add topic </Button>
-    </Fragment>
+    </Button>
   ))(nodeState);
 };
 
