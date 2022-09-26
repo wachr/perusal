@@ -1,4 +1,5 @@
 import { h } from "preact";
+import { useState } from "preact/hooks";
 import { BrowserRouter, Link } from "react-router-dom";
 import { StaticRouter } from "react-router-dom/server";
 
@@ -12,6 +13,7 @@ import Typography from "@mui/material/Typography";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { useImmerReducer } from "use-immer";
 
+import NotYetImplemented from "./NotYetImplemented";
 import Perusal from "./Perusal";
 import StateInspector from "./StateInspector";
 
@@ -42,6 +44,9 @@ const Router = (props) => {
 export default function App() {
   const [appState, dispatch] = useImmerReducer(Perusal.reducer, {});
   const setAppState = (state) => dispatch({ payload: state });
+  const [showTodoSnackbar, setShowTodoSnackbar] = useState(false);
+  const closeTodoSnackbar = () => setShowTodoSnackbar(false);
+  const displayTodoSnackbar = () => setShowTodoSnackbar(true);
   return (
     <div id="App">
       <Router basename={baseroute}>
@@ -63,10 +68,15 @@ export default function App() {
             </Box>
           </AppBar>
           <Toolbar />
+          <NotYetImplemented
+            open={showTodoSnackbar}
+            close={closeTodoSnackbar}
+          />
           <Perusal
             nodeState={appState}
             dispatch={dispatch}
             setNode={setAppState}
+            displayTodoAlert={displayTodoSnackbar}
           />
           <StateInspector nodeState={appState} setNode={setAppState} />
         </ThemeProvider>
