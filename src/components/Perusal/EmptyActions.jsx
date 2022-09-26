@@ -8,13 +8,14 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
+import { nanoid } from "nanoid/non-secure";
 import PropTypes from "prop-types";
 
 import { onEmpty, onString } from "./ops";
 
 const EmptyActions = ({ nodeState, setNode }) => {
   const [open, setOpen] = useState(false);
-  const [topicField, setTopicField] = useState("");
+  const [topicField, setTopicField] = useState(nanoid(5));
   const addString = (setNode, topic) => onString(() => setNode(topic))(topic);
   return onEmpty(() => (
     <Button onClick={() => setOpen(true)}>
@@ -28,6 +29,7 @@ const EmptyActions = ({ nodeState, setNode }) => {
             margin="dense"
             id="topic-field"
             label="new topic"
+            value={topicField}
             onChange={(event) => setTopicField(event.target.value)}
           />
         </DialogContent>

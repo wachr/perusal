@@ -9,6 +9,7 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
+import { nanoid } from "nanoid/non-secure";
 import PropTypes from "prop-types";
 
 import { onString } from "./ops";
@@ -46,6 +47,7 @@ const StringEditButton = ({ nodeState, dispatch }) => {
             }}>
             Update
           </Button>
+          <Button onClick={() => setTopicField(nanoid(5))}>Randomize</Button>
           <Button
             onClick={() => {
               setTopicField(nodeState);
