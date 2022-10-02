@@ -7,30 +7,41 @@ export function isEmpty(nodeState) {
   return false;
 }
 
-export function onEmpty(emptyTransform, unitValue = undefined) {
+export function onCondition(condition, transform, unitValue = undefined) {
   return (nodeState, unit = unitValue) => {
-    if (isEmpty(nodeState)) return emptyTransform();
+    if (condition(nodeState)) return transform(nodeState);
     return unit;
   };
+}
+
+export function onEmpty(emptyTransform, unitValue = undefined) {
+  return onCondition(isEmpty, emptyTransform, unitValue);
 }
 
 export function onString(stringTransform, unitValue = undefined) {
-  return (nodeState, unit = unitValue) => {
-    if (!isEmpty(nodeState) && typeof nodeState === "string")
-      return stringTransform(nodeState);
-    return unit;
-  };
+  return onCondition(
+    (state) => !isEmpty(state) && typeof state === "string",
+    stringTransform,
+    unitValue
+  );
 }
 
 export function onArray(arrayTransform, unitValue = undefined) {
-  return (nodeState, unit = unitValue) => {
-    if (!isEmpty(nodeState) && Array.isArray(nodeState))
-      return arrayTransform(nodeState);
-    return unit;
-  };
+  return onCondition(
+    (state) => !isEmpty(state) && Array.isArray(state),
+    arrayTransform,
+    unitValue
+  );
 }
 
-// TODO export function onObject(objectTransform, unitValue = undefined) {}
+export function onObject(objectTransform, unitValue = undefined) {
+  return onCondition(
+    (state) =>
+      !isEmpty(state) && typeof state === "object" && !Array.isArray(state),
+    objectTransform,
+    unitValue
+  );
+}
 
 export function combine(...ops) {
   return (nodeState, unitValue = undefined) =>

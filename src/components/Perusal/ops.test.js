@@ -1,4 +1,4 @@
-import { combine, isEmpty, onArray, onEmpty, onString } from "./ops";
+import { combine, isEmpty, onArray, onEmpty, onObject, onString } from "./ops";
 
 const mockTransform = jest.fn();
 const mockUnit = { some: "value" };
@@ -62,6 +62,28 @@ describe(onArray.name, () => {
     const result = onArray(mockTransform)({ a: [] });
     expect(mockTransform).not.toHaveBeenCalled();
     expect(result).toBeUndefined();
+  });
+});
+
+describe(onObject.name, () => {
+  it("applies the given transformation to an object nodeState", () => {
+    onObject(mockTransform)({ a: "b" });
+    expect(mockTransform).toHaveBeenCalled();
+  });
+
+  it("does not apply the given transformation to an array nodestate", () => {
+    onObject(mockTransform)(["a", "b"]);
+    expect(mockTransform).not.toHaveBeenCalled();
+  });
+
+  it("does not apply the given transformation to a string nodestate", () => {
+    onObject(mockTransform)("a");
+    expect(mockTransform).not.toHaveBeenCalled();
+  });
+
+  it("does not apply the given transformation to an empty nodestate", () => {
+    onObject(mockTransform)({});
+    expect(mockTransform).not.toHaveBeenCalled();
   });
 });
 

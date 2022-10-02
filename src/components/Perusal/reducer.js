@@ -1,11 +1,38 @@
-import { combine, onArray, onEmpty, onString } from "./ops";
+import { combine, isEmpty, onArray, onEmpty, onObject, onString } from "./ops";
+
+function partition(condition) {
+  return (arr) =>
+    !Array.isArray(arr)
+      ? []
+      : arr.reduce(
+          ([pass, fail], elem) =>
+            condition(elem) ? [[...pass, elem], fail] : [pass, [...fail, elem]],
+          [[], []]
+        );
+}
 
 function narrow(state) {
   return combine(
     onEmpty(() => ({})),
     onString(() => state),
-    onArray(() => (state.length === 1 ? state[0] : state.map(narrow)))
-    // onObject(() => Object.from(state.entries.map((key, value) => return [key, narrow(value)])))
+    onArray(() =>
+      state.length === 1
+        ? narrow(state[0])
+        : state.map(narrow).filter((item) => !isEmpty(item))
+    ),
+    onObject(() => {
+      const [partials, entries] = partition((entry) => entry.some(isEmpty))(
+        Object.entries(state).map(([key, value]) => [key, narrow(value)])
+      );
+      const filteredPartials = partials.flat().filter((e) => !isEmpty(e));
+      return filteredPartials.length === 0
+        ? Object.fromEntries(entries)
+        : narrow(
+            entries.length === 0
+              ? filteredPartials
+              : [Object.fromEntries(entries), ...filteredPartials]
+          );
+    })
   )(state, state);
   // We use state as the unitValue so this becomes
   // a passthrough for unrecognized state shapes.
@@ -17,6 +44,9 @@ const REPLACE_STRING = "replace-string";
 const DELETE_STRING = "delete-string";
 const PROMOTE_STRING_TO_ARRAY = "promote-string-to-array";
 const DELETE_FROM_ARRAY = "delete-from-array";
+const PROMOTE_STRING_TO_OBJECT = "promote-string-to-object";
+const DELETE_KEY_FROM_OBJECT = "delete-key-from-object";
+const DEMOTE_OBJECT_TO_ARRAY = "demote-object-to-array";
 
 export function Narrow() {
   return { type: NARROW };
@@ -42,6 +72,18 @@ export function DeleteFromArray(ind) {
   return { type: DELETE_FROM_ARRAY, payload: ind };
 }
 
+export function PromoteStringToObject(str) {
+  return { type: PROMOTE_STRING_TO_OBJECT, payload: str };
+}
+
+export function DeleteFromObject(key) {
+  return { type: DELETE_KEY_FROM_OBJECT, payload: key };
+}
+
+export function DemoteObjectToArray() {
+  return { type: DEMOTE_OBJECT_TO_ARRAY };
+}
+
 export default function reduce(
   state,
   action = { type: NARROW, payload: undefined }
@@ -65,6 +107,26 @@ export default function reduce(
           const index = action.payload;
           return state.slice(0, index).concat(state.slice(index + 1));
         }, state)(state)
+      );
+    case PROMOTE_STRING_TO_OBJECT:
+      return narrow(
+        onString(() => {
+          return { [state]: action.payload };
+        }, state)(state)
+      );
+    case DELETE_KEY_FROM_OBJECT:
+      return narrow(
+        onObject(() => {
+          const { [action.payload]: _, ...withoutKey } = state;
+          return withoutKey;
+        }, state)(state)
+      );
+    case DEMOTE_OBJECT_TO_ARRAY:
+      return narrow(
+        onObject(
+          () => Object.entries(state).map(([key, value]) => ({ [key]: value })),
+          state
+        )(state)
       );
     default:
       return action.payload || state;
