@@ -13,7 +13,7 @@ import { nanoid } from "nanoid/non-secure";
 import PropTypes from "prop-types";
 
 import { onString } from "./ops";
-import { DeleteString, ReplaceString } from "./reducer";
+import { DeleteString, PromoteStringToObject, ReplaceString } from "./reducer";
 
 const StringEditButton = ({ nodeState, dispatch }) => {
   const [open, setOpen] = useState(false);
@@ -61,11 +61,56 @@ const StringEditButton = ({ nodeState, dispatch }) => {
   );
 };
 
+const StringDescribeButton = ({ nodeState, dispatch }) => {
+  const [open, setOpen] = useState(false);
+  const [subtopicField, setSubtopicField] = useState(nanoid(5));
+  return (
+    <Button onClick={() => setOpen(true)}>
+      Describe
+      <Dialog
+        onClose={() => {
+          setSubtopicField(nodeState);
+          setOpen(false);
+        }}
+        open={open}>
+        <DialogTitle>Add subtopic</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            fullwidth
+            margin="dense"
+            id="topic-field"
+            label="new topic"
+            value={subtopicField}
+            onChange={(event) => setSubtopicField(event.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              dispatch(PromoteStringToObject(subtopicField));
+              setOpen(false);
+            }}>
+            Add
+          </Button>
+          <Button
+            onClick={() => {
+              setSubtopicField("");
+              setOpen(false);
+            }}>
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Button>
+  );
+};
+
 const StringActions = ({ nodeState, dispatch, displayTodoAlert }) =>
   onString(() => {
     return [
       <StringEditButton nodeState={nodeState} dispatch={dispatch} />,
-      <Button onClick={displayTodoAlert}>Describe</Button>,
+      <StringDescribeButton nodeState={nodeState} dispatch={dispatch} />,
       <Button onClick={displayTodoAlert}>Add related topic</Button>,
       <Button onClick={() => dispatch(DeleteString())}>Delete</Button>,
     ];

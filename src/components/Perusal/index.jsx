@@ -8,6 +8,7 @@ import Paper from "@mui/material/Paper";
 import PropTypes from "prop-types";
 
 import EmptyActions from "./EmptyActions";
+import { ObjectActions, ObjectContent } from "./Objects";
 import { StringActions, StringContent } from "./Strings";
 import reducer from "./reducer";
 
@@ -18,10 +19,20 @@ const Perusal = ({ nodeState, dispatch, setNode, displayTodoAlert }) => {
         <Card>
           <CardContent>
             <StringContent nodeState={nodeState} />
+            <ObjectContent
+              nodeState={nodeState}
+              dispatch={dispatch}
+              displayTodoAlert={displayTodoAlert}
+            />
           </CardContent>
           <CardActions>
             <EmptyActions nodeState={nodeState} setNode={setNode} />
             <StringActions
+              nodeState={nodeState}
+              dispatch={dispatch}
+              displayTodoAlert={displayTodoAlert}
+            />
+            <ObjectActions
               nodeState={nodeState}
               dispatch={dispatch}
               displayTodoAlert={displayTodoAlert}
