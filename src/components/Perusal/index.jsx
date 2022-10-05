@@ -7,6 +7,7 @@ import CardContent from "@mui/material/CardContent";
 import Paper from "@mui/material/Paper";
 import PropTypes from "prop-types";
 
+import { ArrayActions, ArrayContent } from "./Arrays";
 import EmptyActions from "./EmptyActions";
 import { ObjectActions, ObjectContent } from "./Objects";
 import { StringActions, StringContent } from "./Strings";
@@ -19,6 +20,11 @@ const Perusal = ({ nodeState, dispatch, setNode, displayTodoAlert }) => {
         <Card>
           <CardContent>
             <StringContent nodeState={nodeState} />
+            <ArrayContent
+              nodeState={nodeState}
+              dispatch={dispatch}
+              displayTodoAlert={displayTodoAlert}
+            />
             <ObjectContent
               nodeState={nodeState}
               dispatch={dispatch}
@@ -28,6 +34,11 @@ const Perusal = ({ nodeState, dispatch, setNode, displayTodoAlert }) => {
           <CardActions>
             <EmptyActions nodeState={nodeState} setNode={setNode} />
             <StringActions
+              nodeState={nodeState}
+              dispatch={dispatch}
+              displayTodoAlert={displayTodoAlert}
+            />
+            <ArrayActions
               nodeState={nodeState}
               dispatch={dispatch}
               displayTodoAlert={displayTodoAlert}

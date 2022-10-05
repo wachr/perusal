@@ -13,7 +13,12 @@ import { nanoid } from "nanoid/non-secure";
 import PropTypes from "prop-types";
 
 import { onString } from "./ops";
-import { DeleteString, PromoteStringToObject, ReplaceString } from "./reducer";
+import {
+  DeleteString,
+  PromoteStringToArray,
+  PromoteStringToObject,
+  ReplaceString,
+} from "./reducer";
 
 const StringEditButton = ({ nodeState, dispatch }) => {
   const [open, setOpen] = useState(false);
@@ -106,12 +111,57 @@ const StringDescribeButton = ({ nodeState, dispatch }) => {
   );
 };
 
+const StringRelateButton = ({ nodeState, dispatch }) => {
+  const [open, setOpen] = useState(false);
+  const [alternativeField, setAlternativeField] = useState(nanoid(5));
+  return (
+    <Button onClick={() => setOpen(true)}>
+      Add related topic
+      <Dialog
+        onClose={() => {
+          setAlternativeField(nodeState);
+          setOpen(false);
+        }}
+        open={open}>
+        <DialogTitle>Add alternative</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            fullwidth
+            margin="dense"
+            id="topic-field"
+            label="new topic"
+            value={alternativeField}
+            onChange={(event) => setAlternativeField(event.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              dispatch(PromoteStringToArray(alternativeField));
+              setOpen(false);
+            }}>
+            Add
+          </Button>
+          <Button
+            onClick={() => {
+              setAlternativeField("");
+              setOpen(false);
+            }}>
+            Cancel
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Button>
+  );
+};
+
 const StringActions = ({ nodeState, dispatch, displayTodoAlert }) =>
   onString(() => {
     return [
       <StringEditButton nodeState={nodeState} dispatch={dispatch} />,
       <StringDescribeButton nodeState={nodeState} dispatch={dispatch} />,
-      <Button onClick={displayTodoAlert}>Add related topic</Button>,
+      <StringRelateButton nodeState={nodeState} dispatch={dispatch} />,
       <Button onClick={() => dispatch(DeleteString())}>Delete</Button>,
     ];
   })(nodeState);
