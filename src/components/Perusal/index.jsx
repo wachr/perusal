@@ -1,6 +1,7 @@
 import { h } from "preact";
 
 import Types from "../../utils/Types";
+import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
@@ -11,7 +12,7 @@ import { ArrayActions, ArrayContent } from "./Arrays";
 import EmptyActions from "./EmptyActions";
 import { ObjectActions, ObjectContent } from "./Objects";
 import { StringActions, StringContent } from "./Strings";
-import reducer from "./reducer";
+import reducer, { Randomize } from "./reducer";
 
 const Perusal = ({ nodeState, dispatch, setNode, displayTodoAlert }) => {
   return (
@@ -32,6 +33,8 @@ const Perusal = ({ nodeState, dispatch, setNode, displayTodoAlert }) => {
             />
           </CardContent>
           <CardActions>
+            <Button onClick={() => dispatch(Randomize())}>Randomize</Button>
+            <Button onClick={() => setNode({})}>Clear</Button>
             <EmptyActions nodeState={nodeState} setNode={setNode} />
             <StringActions
               nodeState={nodeState}

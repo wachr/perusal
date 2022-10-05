@@ -1,4 +1,33 @@
+import { nolookalikesSafe } from "nanoid-dictionary";
+import { customAlphabet } from "nanoid/non-secure";
+
 import { combine, isEmpty, onArray, onEmpty, onObject, onString } from "./ops";
+
+function generateRandomPerusal(size = 5) {
+  function randomIntExclusive(max) {
+    return Math.floor(Math.random() * max);
+  }
+  if (size < 1)
+    return customAlphabet(" " + nolookalikesSafe, randomIntExclusive(12) + 3)();
+  switch (randomIntExclusive(3)) {
+    case 2:
+      return Object.fromEntries(
+        Array(randomIntExclusive(size))
+          .fill(0)
+          .map(() => [
+            generateRandomPerusal(0),
+            generateRandomPerusal(size - 1),
+          ])
+      );
+    case 1:
+      return Array(randomIntExclusive(size) + 2)
+        .fill(0)
+        .map(() => generateRandomPerusal(size - 1))
+        .flat();
+    default:
+      return generateRandomPerusal(0);
+  }
+}
 
 function partition(condition) {
   return (arr) =>
@@ -39,6 +68,7 @@ function narrow(state) {
 }
 
 const NARROW = "narrow";
+const RANDOMIZE = "randomize";
 const PROMOTE_EMPTY_TO_STRING = "promote-empty-to-string";
 const REPLACE_STRING = "replace-string";
 const DELETE_STRING = "delete-string";
@@ -50,6 +80,10 @@ const DEMOTE_OBJECT_TO_ARRAY = "demote-object-to-array";
 
 export function Narrow() {
   return { type: NARROW };
+}
+
+export function Randomize() {
+  return { type: RANDOMIZE };
 }
 
 export function PromoteEmptyToString(str) {
@@ -91,6 +125,8 @@ export default function reduce(
   switch (action.type) {
     case NARROW:
       return narrow(state);
+    case RANDOMIZE:
+      return narrow(generateRandomPerusal());
     case PROMOTE_EMPTY_TO_STRING:
       return narrow(onEmpty(() => String(action.payload), state)(state)); // Coerce to string primitive
     case REPLACE_STRING:
