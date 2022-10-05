@@ -122,11 +122,18 @@ StringActions.propTypes = {
   displayTodoAlert: PropTypes.func.isRequired,
 };
 
-const StringContent = ({ nodeState }) =>
-  onString(() => <Typography variant="h1">{nodeState}</Typography>)(nodeState);
+const StringContent = ({ nodeState, variant }) =>
+  onString(() => <Typography variant={variant}>{nodeState}</Typography>)(
+    nodeState
+  );
 
 StringContent.propTypes = {
   nodeState: Types.nodeState.isRequired,
+  variant: PropTypes.string,
+};
+
+StringContent.defaultProps = {
+  variant: "h1",
 };
 
 export { StringContent, StringActions };
