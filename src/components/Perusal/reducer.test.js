@@ -1,4 +1,5 @@
 import reduce, {
+  AddToArray,
   DeleteFromArray,
   DeleteFromObject,
   DeleteString,
@@ -41,9 +42,23 @@ describe(reduce.name, () => {
   });
 
   it("should delete from an array", () => {
-    const inState = ["a", "b", "c", "d", "e"];
-    const outState = ["a", "b", "c", "e"];
-    expect(reduce(inState, DeleteFromArray(3))).toEqual(outState);
+    const array = ["a", "b", "c", "d", "e"];
+    expect(reduce(array, DeleteFromArray(2))).toBeUndefined();
+    expect(array).toStrictEqual(["a", "b", "d", "e"]);
+    expect(reduce(array, DeleteFromArray(3))).toBeUndefined();
+    expect(array).toStrictEqual(["a", "b", "d"]);
+    expect(reduce(array, DeleteFromArray(0))).toBeUndefined();
+    expect(array).toStrictEqual(["b", "d"]);
+  });
+
+  it("should add to an array", () => {
+    const array = ["b", "d"];
+    expect(reduce(array, AddToArray(0, "a"))).toBeUndefined();
+    expect(array).toStrictEqual(["a", "b", "d"]);
+    expect(reduce(array, AddToArray(3, "e"))).toBeUndefined();
+    expect(array).toStrictEqual(["a", "b", "d", "e"]);
+    expect(reduce(array, AddToArray(2, "c"))).toBeUndefined();
+    expect(array).toStrictEqual(["a", "b", "c", "d", "e"]);
   });
 
   it("should delete from an array down to a string", () => {

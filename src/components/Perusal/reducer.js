@@ -77,6 +77,7 @@ const DELETE_FROM_ARRAY = "delete-from-array";
 const PROMOTE_STRING_TO_OBJECT = "promote-string-to-object";
 const DELETE_KEY_FROM_OBJECT = "delete-key-from-object";
 const DEMOTE_OBJECT_TO_ARRAY = "demote-object-to-array";
+const ADD_TO_ARRAY = "add-to-array";
 
 export function Narrow() {
   return { type: NARROW };
@@ -118,6 +119,10 @@ export function DemoteObjectToArray() {
   return { type: DEMOTE_OBJECT_TO_ARRAY };
 }
 
+export function AddToArray(index, element) {
+  return { type: ADD_TO_ARRAY, payload: { index, element } };
+}
+
 export default function reduce(
   state,
   action = { type: NARROW, payload: undefined }
@@ -138,12 +143,13 @@ export default function reduce(
         onString(() => [state, String(action.payload)], state)(state)
       );
     case DELETE_FROM_ARRAY:
-      return narrow(
-        onArray(() => {
+      return onArray(() => {
+        if (state.length === 2) {
           const index = action.payload;
-          return state.slice(0, index).concat(state.slice(index + 1));
-        }, state)(state)
-      );
+          return narrow(state.slice(0, index).concat(state.slice(index + 1)));
+        }
+        state.splice(action.payload, 1);
+      }, state)(state);
     case PROMOTE_STRING_TO_OBJECT:
       return narrow(
         onString(() => {
@@ -164,6 +170,11 @@ export default function reduce(
           state
         )(state)
       );
+    case ADD_TO_ARRAY:
+      onArray(() => {
+        state.splice(action.payload.index, 0, narrow(action.payload.element));
+      })(state);
+      return;
     default:
       return action.payload || state;
   }
