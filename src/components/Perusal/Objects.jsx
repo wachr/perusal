@@ -13,6 +13,7 @@ import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import PropTypes from "prop-types";
 
+import { ArrayContent } from "./Arrays";
 import { StringContent } from "./Strings";
 import { combine, onArray, onObject, onString } from "./ops";
 
@@ -31,10 +32,16 @@ ObjectActions.propTypes = {
   displayTodoAlert: PropTypes.func.isRequired,
 };
 
-const SubtopicContent = ({ nodeState }) =>
+const SubtopicContent = ({ nodeState, dispatch, displayTodoAlert }) =>
   combine(
     onString(() => <StringContent variant="body1" nodeState={nodeState} />),
-    onArray(() => <Typography>{nodeState.length} subtopics</Typography>),
+    onArray(() => (
+      <ArrayContent
+        nodeState={nodeState}
+        dispatch={dispatch}
+        displayTodoAlert={displayTodoAlert}
+      />
+    )),
     onObject(() => (
       <Typography>
         Not sure how to display {JSON.stringify(nodeState, null, "\t")}
@@ -50,7 +57,11 @@ const ObjectContent = ({ nodeState, dispatch, displayTodoAlert }) =>
           <Typography variant="h6">{key}</Typography>
         </AccordionSummary>
         <AccordionDetails>
-          <SubtopicContent nodeState={value} />
+          <SubtopicContent
+            nodeState={value}
+            dispatch={dispatch}
+            displayTodoAlert={displayTodoAlert}
+          />
         </AccordionDetails>
         <AccordionActions>
           <Button size="small" onClick={displayTodoAlert}>

@@ -16,6 +16,7 @@ import TextField from "@mui/material/TextField";
 import { nanoid } from "nanoid/non-secure";
 import PropTypes from "prop-types";
 
+import { ObjectContent } from "./Objects";
 import { combine, onArray, onObject, onString } from "./ops";
 import { AddToArray, DeleteFromArray } from "./reducer";
 
@@ -76,7 +77,7 @@ ArrayActions.propTypes = {
   displayTodoAlert: PropTypes.func.isRequired,
 };
 
-const ArrayContent = ({ nodeState }) =>
+const ArrayContent = ({ nodeState, dispatch, displayTodoAlert }) =>
   onArray(() => {
     const elements = nodeState.map((element) =>
       combine(
@@ -87,20 +88,16 @@ const ArrayContent = ({ nodeState }) =>
         )),
         onArray(() => (
           <ListItem>
-            <Stack direction="row">
-              {element.map((key) => (
-                <Chip variant="outlined" label={key} />
-              ))}
-            </Stack>
+            <ArrayContent nodeState={element} />
           </ListItem>
         )),
         onObject(() => (
           <ListItem>
-            <Stack direction="row">
-              {Object.keys(element).map((key) => (
-                <Chip variant="outlined" label={key} />
-              ))}
-            </Stack>
+            <ObjectContent
+              nodeState={element}
+              dispatch={dispatch}
+              displayTodoAlert={displayTodoAlert}
+            />
           </ListItem>
         ))
       )(element)
@@ -110,6 +107,8 @@ const ArrayContent = ({ nodeState }) =>
 
 ArrayContent.propTypes = {
   nodeState: Types.nodeState.isRequired,
+  dispatch: PropTypes.func.isRequired,
+  displayTodoAlert: PropTypes.func.isRequired,
 };
 
 export { ArrayContent, ArrayActions };
