@@ -5,6 +5,7 @@ import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
+import Divider from "@mui/material/Divider";
 import Paper from "@mui/material/Paper";
 import PropTypes from "prop-types";
 
@@ -35,6 +36,7 @@ const Perusal = ({ nodeState, dispatch, setNode, displayTodoAlert }) => {
           <CardActions>
             <Button onClick={() => dispatch(Randomize())}>Randomize</Button>
             <Button onClick={() => setNode({})}>Clear</Button>
+            <Divider orientation="vertical" flexItem />
             <EmptyActions nodeState={nodeState} setNode={setNode} />
             <StringActions
               nodeState={nodeState}
