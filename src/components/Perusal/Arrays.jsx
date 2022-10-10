@@ -17,6 +17,7 @@ import { nanoid } from "nanoid/non-secure";
 import PropTypes from "prop-types";
 
 import { ObjectContent } from "./Objects";
+import { StringActions, StringContent } from "./Strings";
 import { combine, onArray, onObject, onString } from "./ops";
 import { AddToArray, DeleteFromArray } from "./reducer";
 
@@ -79,31 +80,56 @@ ArrayActions.propTypes = {
 
 const ArrayContent = ({ nodeState, dispatch, displayTodoAlert }) =>
   onArray(() => {
-    const elements = nodeState.map((element) =>
-      combine(
+    const elements = nodeState.map((element, index) => {
+      const arrayDispatch = (action) => {
+        !!action.path
+          ? action.path.unshift(`${index}`)
+          : (action.path = [`${index}`]);
+        dispatch(action);
+      };
+      return combine(
         onString(() => (
           <ListItem>
-            <ListItemText primary={element} />
+            <Stack direction="row">
+              <StringContent nodeState={element} />
+              <StringActions
+                nodeState={element}
+                dispatch={arrayDispatch}
+                displayTodoAlert={displayTodoAlert}
+              />
+            </Stack>
           </ListItem>
         )),
         onArray(() => (
           <ListItem>
-            <ArrayContent nodeState={element} />
+            <ArrayContent
+              nodeState={element}
+              dispatch={arrayDispatch}
+              displayTodoAlert={displayTodoAlert}
+            />
           </ListItem>
         )),
         onObject(() => (
           <ListItem>
             <ObjectContent
               nodeState={element}
-              dispatch={dispatch}
+              dispatch={arrayDispatch}
               displayTodoAlert={displayTodoAlert}
             />
           </ListItem>
         ))
-      )(element)
-    );
+      )(element);
+    });
     return <List> {elements} </List>;
   })(nodeState);
+function arrayDispatch(index) {
+  return (action) => {
+    !!action.path
+      ? action.path.unshift(`${index}`)
+      : (action.path = [`${index}`]);
+    dispatch(action);
+  };
+}
 
 ArrayContent.propTypes = {
   nodeState: Types.nodeState.isRequired,

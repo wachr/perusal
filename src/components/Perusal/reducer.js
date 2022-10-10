@@ -125,8 +125,17 @@ export function AddToArray(index, element) {
 
 export default function reduce(
   state,
-  action = { type: NARROW, payload: undefined }
+  action = { type: NARROW, payload: undefined, path: [] }
 ) {
+  console.log({
+    ...structuredClone(action),
+    state: JSON.parse(JSON.stringify(state)),
+  });
+  const path = Array.isArray(action.path) && action.path[0];
+  if (Array.isArray(action.path) && action.path.length > 1) {
+    action.path.shift();
+    return reduce(state[path], action);
+  }
   switch (action.type) {
     case NARROW:
       return narrow(state);
@@ -134,14 +143,22 @@ export default function reduce(
       return narrow(generateRandomPerusal());
     case PROMOTE_EMPTY_TO_STRING:
       return narrow(onEmpty(() => String(action.payload), state)(state)); // Coerce to string primitive
-    case REPLACE_STRING:
-      return narrow(onString(() => String(action.payload), state)(state));
+    case REPLACE_STRING: {
+      const newString = narrow(String(action.payload));
+      return combine(
+        onString(() => newString),
+        onArray(() => void state.splice(path, 1, newString))
+      )(state, state);
+    }
     case DELETE_STRING:
       return narrow(onString(() => "", state)(state));
-    case PROMOTE_STRING_TO_ARRAY:
-      return narrow(
-        onString(() => [state, String(action.payload)], state)(state)
-      );
+    case PROMOTE_STRING_TO_ARRAY: {
+      const newString = narrow(String(action.payload));
+      return combine(
+        onString(() => [state, newString]),
+        onArray(() => void state.splice(path, 1, [state[path], newString]))
+      )(state, state);
+    }
     case DELETE_FROM_ARRAY:
       return onArray(() => {
         if (state.length === 2) {
@@ -150,12 +167,14 @@ export default function reduce(
         }
         state.splice(action.payload, 1);
       }, state)(state);
-    case PROMOTE_STRING_TO_OBJECT:
-      return narrow(
-        onString(() => {
-          return { [state]: action.payload };
-        }, state)(state)
-      );
+    case PROMOTE_STRING_TO_OBJECT: {
+      return combine(
+        onString(() => ({ [state]: narrow(action.payload) })),
+        onArray(() => {
+          state.splice(path, 1, { [state[path]]: narrow(action.payload) });
+        })
+      )(state, state);
+    }
     case DELETE_KEY_FROM_OBJECT:
       return narrow(
         onObject(() => {
