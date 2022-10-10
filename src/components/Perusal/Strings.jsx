@@ -7,6 +7,7 @@ import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogTitle from "@mui/material/DialogTitle";
+import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import { nanoid } from "nanoid/non-secure";
@@ -173,9 +174,11 @@ StringActions.propTypes = {
 };
 
 const StringContent = ({ nodeState, variant }) =>
-  onString(() => <Typography variant={variant}>{nodeState}</Typography>)(
-    nodeState
-  );
+  onString(() => (
+    <Paper>
+      <Typography variant={variant}>{nodeState}</Typography>
+    </Paper>
+  ))(nodeState);
 
 StringContent.propTypes = {
   nodeState: Types.nodeState.isRequired,

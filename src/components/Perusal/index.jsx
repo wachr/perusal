@@ -21,17 +21,19 @@ const Perusal = ({ nodeState, dispatch, setNode, displayTodoAlert }) => {
       <Paper variant="outlined">
         <Card>
           <CardContent>
-            <StringContent nodeState={nodeState} />
-            <ArrayContent
-              nodeState={nodeState}
-              dispatch={dispatch}
-              displayTodoAlert={displayTodoAlert}
-            />
-            <ObjectContent
-              nodeState={nodeState}
-              dispatch={dispatch}
-              displayTodoAlert={displayTodoAlert}
-            />
+            <Paper>
+              <StringContent nodeState={nodeState} />
+              <ArrayContent
+                nodeState={nodeState}
+                dispatch={dispatch}
+                displayTodoAlert={displayTodoAlert}
+              />
+              <ObjectContent
+                nodeState={nodeState}
+                dispatch={dispatch}
+                displayTodoAlert={displayTodoAlert}
+              />
+            </Paper>
           </CardContent>
           <CardActions>
             <Button onClick={() => dispatch(Randomize())}>Randomize</Button>
