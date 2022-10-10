@@ -11,7 +11,10 @@ import Stack from "@mui/material/Stack";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { useImmerReducer } from "use-immer";
 
+import NotYetImplemented from "./NotYetImplemented";
+import Perusal from "./Perusal";
 import StateInspector from "./StateInspector";
 
 const theme = createTheme({
@@ -39,7 +42,11 @@ const Router = (props) => {
 };
 
 export default function App() {
-  const [appState, setAppState] = useState({});
+  const [appState, dispatch] = useImmerReducer(Perusal.reducer, {});
+  const setAppState = (state) => dispatch({ payload: state });
+  const [showTodoSnackbar, setShowTodoSnackbar] = useState(false);
+  const closeTodoSnackbar = () => setShowTodoSnackbar(false);
+  const displayTodoSnackbar = () => setShowTodoSnackbar(true);
   return (
     <div id="App">
       <Router basename={baseroute}>
@@ -61,7 +68,16 @@ export default function App() {
             </Box>
           </AppBar>
           <Toolbar />
-          <Typography variant="h1">Hello, World!</Typography>
+          <NotYetImplemented
+            open={showTodoSnackbar}
+            close={closeTodoSnackbar}
+          />
+          <Perusal
+            nodeState={appState}
+            dispatch={dispatch}
+            setNode={setAppState}
+            displayTodoAlert={displayTodoSnackbar}
+          />
           <StateInspector nodeState={appState} setNode={setAppState} />
         </ThemeProvider>
       </Router>

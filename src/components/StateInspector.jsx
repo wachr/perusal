@@ -1,6 +1,6 @@
 import { h } from "preact";
-import { useState } from "preact/hooks";
 
+import Types from "../utils/Types";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import Box from "@mui/material/Box";
@@ -8,12 +8,18 @@ import Button from "@mui/material/Button";
 import Paper from "@mui/material/Paper";
 import TextField from "@mui/material/TextField";
 import PropTypes from "prop-types";
+import { useImmer } from "use-immer";
 
 import FileStorage from "./FileStorage";
 import GistStorage from "./GistStorage";
 
 const StateInspector = ({ nodeState, setNode }) => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useImmer(false);
+  function toggleCollapsed() {
+    setCollapsed((draft) => {
+      return !draft;
+    });
+  }
   const stateString = JSON.stringify(nodeState, null, "\t");
   return (
     <div data-testid="StateInspector-div">
@@ -27,7 +33,7 @@ const StateInspector = ({ nodeState, setNode }) => {
                 marginRight: "-5pt",
               }}>
               <Button
-                onClick={() => setCollapsed(!collapsed)}
+                onClick={() => toggleCollapsed()}
                 aria-label="show or hide state">
                 {collapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
               </Button>
@@ -56,11 +62,7 @@ const StateInspector = ({ nodeState, setNode }) => {
 };
 
 StateInspector.propTypes = {
-  nodeState: PropTypes.oneOfType([
-    PropTypes.shape(),
-    PropTypes.array,
-    PropTypes.string,
-  ]).isRequired,
+  nodeState: Types.nodeState.isRequired,
   setNode: PropTypes.func.isRequired,
 };
 
