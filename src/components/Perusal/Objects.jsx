@@ -1,16 +1,14 @@
-import { h } from "preact";
+import { Fragment, h } from "preact";
+import { useState } from "preact/hooks";
 
 import Types from "../../utils/Types";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import Accordion from "@mui/material/Accordion";
-import AccordionActions from "@mui/material/AccordionActions";
-import AccordionDetails from "@mui/material/AccordionDetails";
-import AccordionSummary from "@mui/material/AccordionSummary";
+import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
-import Typography from "@mui/material/Typography";
+import Tab from "@mui/material/Tab";
+import Tabs from "@mui/material/Tabs";
 import PropTypes from "prop-types";
 
 import { ArrayContent } from "./Arrays";
@@ -32,6 +30,47 @@ ObjectActions.propTypes = {
   displayTodoAlert: PropTypes.func.isRequired,
 };
 
+const ObjectSubtopicContent = ({ nodeState, dispatch, displayTodoAlert }) => {
+  const [tabIndex, setTabIndex] = useState(0);
+  const handleTabChange = (_, newIndex) => {
+    setTabIndex(newIndex);
+  };
+  return (
+    <Tabs
+      orientation="vertical"
+      variant="scrollable"
+      value={tabIndex}
+      onChange={handleTabChange}
+      aria-label="object subtopic"
+      selectionFollowsFocus>
+      {Object.entries(nodeState).map(([key, value], index) => (
+        <Fragment>
+          <Tab
+            label={key}
+            id={`vertical-tab-${index}`}
+            aria-controls={`vertical-tabpanel-${index}`}
+          />
+          <div
+            role="tabpanel"
+            hidden={tabIndex !== index}
+            id={`vertical-tabpanel-${index}`}
+            aria-labelledby={`vertical-tab-${index}`}>
+            {tabIndex === index && (
+              <Box sx={{ p: 3 }}>
+                <SubtopicContent
+                  nodeState={value}
+                  dispatch={dispatch}
+                  displayTodoAlert={displayTodoAlert}
+                />
+              </Box>
+            )}
+          </div>
+        </Fragment>
+      ))}
+    </Tabs>
+  );
+};
+
 const SubtopicContent = ({ nodeState, dispatch, displayTodoAlert }) =>
   combine(
     onString(() => <StringContent variant="body1" nodeState={nodeState} />),
@@ -43,40 +82,38 @@ const SubtopicContent = ({ nodeState, dispatch, displayTodoAlert }) =>
       />
     )),
     onObject(() => (
-      <Typography>
-        Not sure how to display {JSON.stringify(nodeState, null, "\t")}
-      </Typography>
+      <Box
+        sx={{
+          flexGrow: 1,
+          bgcolor: "background.paper",
+          display: "flex",
+        }}>
+        <ObjectSubtopicContent
+          nodeState={nodeState}
+          dispatch={dispatch}
+          displayTodoAlert={displayTodoAlert}
+        />
+      </Box>
     ))
   )(nodeState);
 
 const ObjectContent = ({ nodeState, dispatch, displayTodoAlert }) =>
   onObject(() => {
-    const topics = Object.entries(nodeState).map(([key, value]) => (
-      <Accordion>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="h6">{key}</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <SubtopicContent
-            nodeState={value}
-            dispatch={dispatch}
-            displayTodoAlert={displayTodoAlert}
-          />
-        </AccordionDetails>
-        <AccordionActions>
-          <Button size="small" onClick={displayTodoAlert}>
-            Remove sub-topic
-          </Button>
-        </AccordionActions>
-      </Accordion>
-    ));
     return (
-      <Card>
-        <CardContent>{topics}</CardContent>
-        <CardActions>
-          <Button onClick={displayTodoAlert}>Add sub-topic</Button>
-        </CardActions>
-      </Card>
+      <Box sx={{ display: "flex" }}>
+        <Card>
+          <CardContent>
+            <ObjectSubtopicContent
+              nodeState={nodeState}
+              dispatch={dispatch}
+              displayTodoAlert={displayTodoAlert}
+            />
+          </CardContent>
+          <CardActions>
+            <Button onClick={displayTodoAlert}>Add sub-topic</Button>
+          </CardActions>
+        </Card>
+      </Box>
     );
   })(nodeState);
 
