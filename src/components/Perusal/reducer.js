@@ -20,7 +20,7 @@ function generateRandomPerusal(size = 5) {
           ])
       );
     case 1:
-      return Array(randomIntExclusive(size) + 2)
+      return Array(randomIntExclusive(size / 2) + 2)
         .fill(0)
         .map(() => generateRandomPerusal(size - 1))
         .flat();
