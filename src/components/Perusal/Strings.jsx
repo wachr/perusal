@@ -1,18 +1,12 @@
 import { h } from "preact";
-import { useState } from "preact/hooks";
 
 import Types from "../../utils/Types";
 import Button from "@mui/material/Button";
-import Dialog from "@mui/material/Dialog";
-import DialogActions from "@mui/material/DialogActions";
-import DialogContent from "@mui/material/DialogContent";
-import DialogTitle from "@mui/material/DialogTitle";
 import Paper from "@mui/material/Paper";
-import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
-import { nanoid } from "nanoid/non-secure";
 import PropTypes from "prop-types";
 
+import TopicDialog from "./TopicDialog";
 import { onString } from "./ops";
 import {
   DeleteString,
@@ -21,148 +15,22 @@ import {
   ReplaceString,
 } from "./reducer";
 
-const StringEditButton = ({ nodeState, dispatch }) => {
-  const [open, setOpen] = useState(false);
-  const [topicField, setTopicField] = useState(nodeState);
-  return (
-    <Button onClick={() => setOpen(true)}>
-      Edit
-      <Dialog
-        onClose={() => {
-          setTopicField(nodeState);
-          setOpen(false);
-        }}
-        open={open}>
-        <DialogTitle>Edit topic</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            fullwidth
-            margin="dense"
-            id="topic-field"
-            label="new topic"
-            value={topicField}
-            onChange={(event) => setTopicField(event.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => {
-              dispatch(ReplaceString(topicField));
-              setOpen(false);
-            }}>
-            Update
-          </Button>
-          <Button onClick={() => setTopicField(nanoid(5))}>Randomize</Button>
-          <Button
-            onClick={() => {
-              setTopicField(nodeState);
-              setOpen(false);
-            }}>
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Button>
-  );
-};
-
-const StringDescribeButton = ({ nodeState, dispatch }) => {
-  const [open, setOpen] = useState(false);
-  const [subtopicField, setSubtopicField] = useState(nanoid(5));
-  return (
-    <Button onClick={() => setOpen(true)}>
-      Describe
-      <Dialog
-        onClose={() => {
-          setSubtopicField(nodeState);
-          setOpen(false);
-        }}
-        open={open}>
-        <DialogTitle>Add subtopic</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            fullwidth
-            margin="dense"
-            id="topic-field"
-            label="new topic"
-            value={subtopicField}
-            onChange={(event) => setSubtopicField(event.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => {
-              dispatch(PromoteStringToObject(subtopicField));
-              setOpen(false);
-            }}>
-            Add
-          </Button>
-          <Button
-            onClick={() => {
-              setSubtopicField("");
-              setOpen(false);
-            }}>
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Button>
-  );
-};
-
-const StringRelateButton = ({ nodeState, dispatch }) => {
-  const [open, setOpen] = useState(false);
-  const [alternativeField, setAlternativeField] = useState(nanoid(5));
-  return (
-    <Button onClick={() => setOpen(true)}>
-      Add related topic
-      <Dialog
-        onClose={() => {
-          setAlternativeField(nodeState);
-          setOpen(false);
-        }}
-        open={open}>
-        <DialogTitle>Add alternative</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            fullwidth
-            margin="dense"
-            id="topic-field"
-            label="new topic"
-            value={alternativeField}
-            onChange={(event) => setAlternativeField(event.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => {
-              dispatch(PromoteStringToArray(alternativeField));
-              setOpen(false);
-            }}>
-            Add
-          </Button>
-          <Button
-            onClick={() => {
-              setAlternativeField("");
-              setOpen(false);
-            }}>
-            Cancel
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </Button>
-  );
-};
-
-const StringActions = ({ nodeState, dispatch, displayTodoAlert }) =>
+const StringActions = ({ nodeState, dispatch }) =>
   onString(() => {
     return [
-      <StringEditButton nodeState={nodeState} dispatch={dispatch} />,
-      <StringDescribeButton nodeState={nodeState} dispatch={dispatch} />,
-      <StringRelateButton nodeState={nodeState} dispatch={dispatch} />,
+      <TopicDialog
+        text="Edit"
+        value={nodeState}
+        update={(newTopic) => dispatch(ReplaceString(newTopic))}
+      />,
+      <TopicDialog
+        text="Describe"
+        update={(newTopic) => dispatch(PromoteStringToObject(newTopic))}
+      />,
+      <TopicDialog
+        text="Add related topic"
+        update={(newTopic) => dispatch(PromoteStringToArray(newTopic))}
+      />,
       <Button onClick={() => dispatch(DeleteString())}>Delete</Button>,
     ];
   })(nodeState);
@@ -170,7 +38,6 @@ const StringActions = ({ nodeState, dispatch, displayTodoAlert }) =>
 StringActions.propTypes = {
   nodeState: Types.nodeState.isRequired,
   dispatch: PropTypes.func.isRequired,
-  displayTodoAlert: PropTypes.func.isRequired,
 };
 
 const StringContent = ({ nodeState, variant }) =>
