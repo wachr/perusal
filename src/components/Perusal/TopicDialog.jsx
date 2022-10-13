@@ -39,7 +39,7 @@ const TopicDialog = ({ text, value, update }) => {
           <Button
             onClick={() => {
               update(topicField);
-              setOpen(false);
+              close();
             }}>
             Submit
           </Button>
