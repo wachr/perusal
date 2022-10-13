@@ -78,6 +78,7 @@ const PROMOTE_STRING_TO_OBJECT = "promote-string-to-object";
 const DELETE_KEY_FROM_OBJECT = "delete-key-from-object";
 const DEMOTE_OBJECT_TO_ARRAY = "demote-object-to-array";
 const ADD_TO_ARRAY = "add-to-array";
+const ADD_KEY_VALUE_TO_OBJECT = "add-key-value-to-object";
 
 export function Narrow() {
   return { type: NARROW };
@@ -121,6 +122,10 @@ export function DemoteObjectToArray() {
 
 export function AddToArray(index, element) {
   return { type: ADD_TO_ARRAY, payload: { index, element } };
+}
+
+export function AddKeyValueToObject(key, value) {
+  return { type: ADD_KEY_VALUE_TO_OBJECT, payload: { key, value } };
 }
 
 export default function reduce(
@@ -192,6 +197,11 @@ export default function reduce(
     case ADD_TO_ARRAY:
       onArray(() => {
         state.splice(action.payload.index, 0, narrow(action.payload.element));
+      })(state);
+      return;
+    case ADD_KEY_VALUE_TO_OBJECT:
+      onObject(() => {
+        state[action.payload.key] = action.payload.value;
       })(state);
       return;
     default:
