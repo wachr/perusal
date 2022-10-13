@@ -44,6 +44,15 @@ ObjectActions.propTypes = {
   displayTodoAlert: PropTypes.func.isRequired,
 };
 
+function onKey(key, dispatch) {
+  return (action) => {
+    !!action.path
+      ? action.path.unshift(String(key))
+      : (action.path = [String(key)]);
+    dispatch(action);
+  };
+}
+
 const ObjectSubtopicContentAccordian = ({
   nodeState,
   dispatch,
@@ -62,7 +71,7 @@ const ObjectSubtopicContentAccordian = ({
           <Paper variant="outlined">
             <SubtopicContent
               nodeState={value}
-              dispatch={dispatch}
+              dispatch={onKey(key, dispatch)}
               displayTodoAlert={displayTodoAlert}
             />
           </Paper>
@@ -98,7 +107,7 @@ const ObjectSubtopicContentTabbed = ({
             <Paper variant="outlined">
               <SubtopicContent
                 nodeState={value}
-                dispatch={dispatch}
+                dispatch={onKey(key, dispatch)}
                 displayTodoAlert={displayTodoAlert}
               />
             </Paper>
@@ -133,21 +142,19 @@ const ObjectSubtopicContentTabbed = ({
   })(nodeState);
 
 const ObjectSubtopicContent = ({ nodeState, dispatch, displayTodoAlert }) =>
-  onObject(() =>
-    Object.keys(nodeState).length === 1 ? (
-      <ObjectSubtopicContentAccordian
+  onObject(() => {
+    const SubtopicContent =
+      Object.keys(nodeState).length === 1
+        ? ObjectSubtopicContentAccordian
+        : ObjectSubtopicContentTabbed;
+    return (
+      <SubtopicContent
         nodeState={nodeState}
         dispatch={dispatch}
         displayTodoAlert={displayTodoAlert}
       />
-    ) : (
-      <ObjectSubtopicContentTabbed
-        nodeState={nodeState}
-        dispatch={dispatch}
-        displayTodoAlert={displayTodoAlert}
-      />
-    )
-  )(nodeState);
+    );
+  })(nodeState);
 
 const SubtopicContent = ({ nodeState, dispatch, displayTodoAlert }) =>
   combine(
@@ -231,7 +238,7 @@ const ObjectContent = ({ nodeState, dispatch, displayTodoAlert }) =>
         <CardContent>
           <ObjectSubtopicContent
             nodeState={nodeState}
-            dispatch={displayTodoAlert}
+            dispatch={dispatch}
             displayTodoAlert={displayTodoAlert}
           />
         </CardContent>

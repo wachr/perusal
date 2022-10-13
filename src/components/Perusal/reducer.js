@@ -152,7 +152,10 @@ export default function reduce(
       const newString = narrow(String(action.payload));
       return combine(
         onString(() => newString),
-        onArray(() => void state.splice(path, 1, newString))
+        onArray(() => void state.splice(path, 1, newString)),
+        onObject(() => {
+          state[path] = newString;
+        })
       )(state, state);
     }
     case DELETE_STRING:
