@@ -24,10 +24,11 @@ import Typography from "@mui/material/Typography";
 import PropTypes from "prop-types";
 
 import { ArrayContent } from "./Arrays";
+import EmptyActions from "./EmptyActions";
 import { StringActions, StringContent } from "./Strings";
 import TopicDialog from "./TopicDialog";
-import { combine, onArray, onObject, onString } from "./ops";
-import { AddKeyValueToObject } from "./reducer";
+import { combine, onArray, onEmpty, onObject, onString } from "./ops";
+import { AddKeyValueToObject, DeleteFromObject } from "./reducer";
 
 const ObjectActions = ({ nodeState, dispatch, displayTodoAlert }) =>
   onObject(() => {
@@ -87,9 +88,6 @@ const ObjectSubtopicContentTabbed = ({
 }) =>
   onObject(() => {
     const [tabIndex, setTabIndex] = useState(0);
-    const handleTabChange = (_, newIndex) => {
-      setTabIndex(newIndex);
-    };
     const [tabs, panels] = Object.entries(nodeState)
       .map(([key, value], index) => [
         <Tab
@@ -129,7 +127,7 @@ const ObjectSubtopicContentTabbed = ({
             orientation="horizontal"
             variant="scrollable"
             value={tabIndex}
-            onChange={handleTabChange}
+            onChange={(_, index) => setTabIndex(index)}
             aria-label="object subtopic"
             scrollButtons
             allowScrollButtonsMobile>
@@ -158,6 +156,9 @@ const ObjectSubtopicContent = ({ nodeState, dispatch, displayTodoAlert }) =>
 
 const SubtopicContent = ({ nodeState, dispatch, displayTodoAlert }) =>
   combine(
+    onEmpty(() => (
+      <EmptyActions nodeState={nodeState} setNode={displayTodoAlert} />
+    )),
     onString(() => (
       <Stack direction="row">
         <StringContent variant="body1" nodeState={nodeState} />
@@ -205,14 +206,14 @@ const AddSubtopicDialog = ({ dispatch }) => {
             id="sub-topic-key-field"
             label="sub-topic key"
             value={keyField}
-            onChange={(_, newValue) => setKeyField(newValue)}
+            onChange={({ target: { value } }) => setKeyField(value)}
           />
           <TextField
             margin="dense"
             id="sub-topic-value-field"
             label="sub-topic value"
             value={valueField}
-            onChange={(_, newValue) => setValueField(newValue)}
+            onChange={({ target: { value } }) => setValueField(value)}
           />
         </DialogContent>
         <DialogActions>
@@ -244,7 +245,10 @@ const ObjectContent = ({ nodeState, dispatch, displayTodoAlert }) =>
         </CardContent>
         <CardActions>
           <AddSubtopicDialog dispatch={dispatch} />
-          <Button onClick={displayTodoAlert}>Remove sub-topic</Button>
+          <TopicDialog
+            text="Remove sub-topic"
+            update={(topic) => dispatch(DeleteFromObject(topic))}
+          />
         </CardActions>
       </Card>
     );

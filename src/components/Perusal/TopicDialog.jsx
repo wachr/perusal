@@ -32,7 +32,7 @@ const TopicDialog = ({ text, value, update }) => {
             id="topic-field"
             label="new topic"
             value={topicField}
-            onChange={(_, newValue) => setTopicField(newValue)}
+            onChange={({ target: { value } }) => setTopicField(value)}
           />
         </DialogContent>
         <DialogActions>

@@ -159,7 +159,15 @@ export default function reduce(
       )(state, state);
     }
     case DELETE_STRING:
-      return narrow(onString(() => "", state)(state));
+      return combine(
+        onString(() => narrow("")),
+        onArray(() => {
+          if (!!path) return reduce(state, DeleteFromArray(path));
+        }),
+        onObject(() => {
+          if (!!path) return reduce(state, AddKeyValueToObject(path, ""));
+        })
+      )(state, state);
     case PROMOTE_STRING_TO_ARRAY: {
       const newString = narrow(String(action.payload));
       return combine(
