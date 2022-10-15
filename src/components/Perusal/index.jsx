@@ -39,7 +39,7 @@ const Perusal = ({ nodeState, dispatch, setNode, displayTodoAlert }) => {
             <Button onClick={() => dispatch(Randomize())}>Randomize</Button>
             <Button onClick={() => setNode({})}>Clear</Button>
             <Divider orientation="vertical" flexItem />
-            <EmptyActions nodeState={nodeState} setNode={setNode} />
+            <EmptyActions nodeState={nodeState} dispatch={dispatch} />
             <StringActions
               nodeState={nodeState}
               dispatch={dispatch}

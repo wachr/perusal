@@ -156,9 +156,7 @@ const ObjectSubtopicContent = ({ nodeState, dispatch, displayTodoAlert }) =>
 
 const SubtopicContent = ({ nodeState, dispatch, displayTodoAlert }) =>
   combine(
-    onEmpty(() => (
-      <EmptyActions nodeState={nodeState} setNode={displayTodoAlert} />
-    )),
+    onEmpty(() => <EmptyActions nodeState={nodeState} dispatch={dispatch} />),
     onString(() => (
       <Stack direction="row">
         <StringContent variant="body1" nodeState={nodeState} />
