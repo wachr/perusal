@@ -26,11 +26,10 @@ const TopicDialog = ({ text, value, update }) => {
         <DialogTitle>{String(text)}</DialogTitle>
         <DialogContent>
           <TextField
-            autoFocus
             fullwidth
             margin="dense"
             id="topic-field"
-            label="new topic"
+            label="topic"
             value={topicField}
             onChange={({ target: { value } }) => setTopicField(value)}
           />
