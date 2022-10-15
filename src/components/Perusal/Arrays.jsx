@@ -11,7 +11,7 @@ import { ObjectContent } from "./Objects";
 import { StringActions, StringContent } from "./Strings";
 import TopicDialog from "./TopicDialog";
 import { combine, onArray, onObject, onString } from "./ops";
-import { AddToArray, DeleteFromArray } from "./reducer";
+import { AddToArray, DeleteFromArray, withPath } from "./reducer";
 
 const ArrayActions = ({ nodeState, dispatch }) =>
   onArray(() => {
@@ -37,12 +37,8 @@ ArrayActions.propTypes = {
 const ArrayContent = ({ nodeState, dispatch, displayTodoAlert }) =>
   onArray(() => {
     const elements = nodeState.map((element, index) => {
-      const arrayDispatch = (action) => {
-        !!action.path
-          ? action.path.unshift(`${index}`)
-          : (action.path = [`${index}`]);
-        dispatch(action);
-      };
+      const arrayDispatch = (action) =>
+        dispatch(withPath(String(index))(action));
       return combine(
         onString(() => (
           <ListItem>

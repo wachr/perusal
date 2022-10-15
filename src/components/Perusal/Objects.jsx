@@ -28,7 +28,8 @@ import EmptyActions from "./EmptyActions";
 import { StringActions, StringContent } from "./Strings";
 import TopicDialog from "./TopicDialog";
 import { combine, onArray, onEmpty, onObject, onString } from "./ops";
-import { AddKeyValueToObject, DeleteFromObject } from "./reducer";
+import { DeleteFromObject, SetKeyValueInObject } from "./reducer";
+import { withPath } from "./reducer";
 
 const ObjectActions = ({ nodeState, dispatch, displayTodoAlert }) =>
   onObject(() => {
@@ -47,10 +48,7 @@ ObjectActions.propTypes = {
 
 function onKey(key, dispatch) {
   return (action) => {
-    !!action.path
-      ? action.path.unshift(String(key))
-      : (action.path = [String(key)]);
-    dispatch(action);
+    dispatch(withPath(key)(action));
   };
 }
 
@@ -217,7 +215,7 @@ const AddSubtopicDialog = ({ dispatch }) => {
         <DialogActions>
           <Button
             onClick={() => {
-              dispatch(AddKeyValueToObject(keyField, valueField));
+              dispatch(SetKeyValueInObject(keyField, valueField));
               close();
             }}>
             Submit

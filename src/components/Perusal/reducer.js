@@ -73,12 +73,12 @@ const PROMOTE_EMPTY_TO_STRING = "promote-empty-to-string";
 const REPLACE_STRING = "replace-string";
 const DELETE_STRING = "delete-string";
 const PROMOTE_STRING_TO_ARRAY = "promote-string-to-array";
+const ADD_TO_ARRAY = "add-to-array";
 const DELETE_FROM_ARRAY = "delete-from-array";
 const PROMOTE_STRING_TO_OBJECT = "promote-string-to-object";
 const DELETE_KEY_FROM_OBJECT = "delete-key-from-object";
 const DEMOTE_OBJECT_TO_ARRAY = "demote-object-to-array";
-const ADD_TO_ARRAY = "add-to-array";
-const ADD_KEY_VALUE_TO_OBJECT = "add-key-value-to-object";
+const SET_KEY_VALUE_IN_OBJECT = "set-key-value-in-object";
 
 export function Narrow() {
   return { type: NARROW };
@@ -104,6 +104,10 @@ export function PromoteStringToArray(str) {
   return { type: PROMOTE_STRING_TO_ARRAY, payload: str };
 }
 
+export function AddToArray(index, element) {
+  return { type: ADD_TO_ARRAY, payload: { index, element } };
+}
+
 export function DeleteFromArray(ind) {
   return { type: DELETE_FROM_ARRAY, payload: ind };
 }
@@ -120,34 +124,53 @@ export function DemoteObjectToArray() {
   return { type: DEMOTE_OBJECT_TO_ARRAY };
 }
 
-export function AddToArray(index, element) {
-  return { type: ADD_TO_ARRAY, payload: { index, element } };
+export function SetKeyValueInObject(key, value) {
+  return { type: SET_KEY_VALUE_IN_OBJECT, payload: { key, value } };
 }
 
-export function AddKeyValueToObject(key, value) {
-  return { type: ADD_KEY_VALUE_TO_OBJECT, payload: { key, value } };
+export function withPath(...pathParts) {
+  return (action) => {
+    !!action.path
+      ? action.path.unshift(...pathParts)
+      : (action.path = pathParts);
+    return action;
+  };
 }
 
 export default function reduce(
   state,
-  action = { type: NARROW, payload: undefined, path: [] }
+  action = { type: NARROW, payload: undefined, path: [], recursive: false }
 ) {
   console.log({
     ...structuredClone(action),
     state: JSON.parse(JSON.stringify(state)),
   });
+  const recur = (state, action) => {
+    action.recursive = true;
+    return reduce(state, action);
+  };
   const path = Array.isArray(action.path) && action.path[0];
   if (Array.isArray(action.path) && action.path.length > 1) {
     action.path.shift();
-    return reduce(state[path], action);
+    return recur(state[path], action);
   }
   switch (action.type) {
     case NARROW:
       return narrow(state);
+
     case RANDOMIZE:
       return narrow(generateRandomPerusal());
-    case PROMOTE_EMPTY_TO_STRING:
-      return narrow(onEmpty(() => String(action.payload), state)(state)); // Coerce to string primitive
+
+    case PROMOTE_EMPTY_TO_STRING: {
+      const newString = narrow(String(action.payload));
+      return combine(
+        onEmpty(() => newString),
+        onObject(() => {
+          if (!!path) state[path] = newString;
+        })
+      )(state, state);
+    }
+
     case REPLACE_STRING: {
       const newString = narrow(String(action.payload));
       return combine(
@@ -158,16 +181,19 @@ export default function reduce(
         })
       )(state, state);
     }
+
     case DELETE_STRING:
       return combine(
         onString(() => narrow("")),
         onArray(() => {
-          if (!!path) return reduce(state, DeleteFromArray(path));
+          if (!!path) return recur(state, DeleteFromArray(path));
         }),
         onObject(() => {
-          if (!!path) return reduce(state, AddKeyValueToObject(path, ""));
+          if (!!path)
+            return recur(state, SetKeyValueInObject(path, narrow("")));
         })
       )(state, state);
+
     case PROMOTE_STRING_TO_ARRAY: {
       const newString = narrow(String(action.payload));
       return combine(
@@ -175,6 +201,13 @@ export default function reduce(
         onArray(() => void state.splice(path, 1, [state[path], newString]))
       )(state, state);
     }
+
+    case ADD_TO_ARRAY:
+      onArray(() => {
+        state.splice(action.payload.index, 0, narrow(action.payload.element));
+      })(state);
+      return;
+
     case DELETE_FROM_ARRAY:
       return onArray(() => {
         if (state.length === 2) {
@@ -183,14 +216,24 @@ export default function reduce(
         }
         state.splice(action.payload, 1);
       }, state)(state);
+
     case PROMOTE_STRING_TO_OBJECT: {
       return combine(
         onString(() => ({ [state]: narrow(action.payload) })),
         onArray(() => {
           state.splice(path, 1, { [state[path]]: narrow(action.payload) });
+        }),
+        onObject(() => {
+          const newKey = path;
+          const newValue = { [state[path]]: narrow(String(action.payload)) };
+          const newAction = withPath(path)(
+            SetKeyValueInObject(newKey, newValue)
+          );
+          return recur(state, newAction);
         })
       )(state, state);
     }
+
     case DELETE_KEY_FROM_OBJECT:
       return narrow(
         onObject(() => {
@@ -198,6 +241,7 @@ export default function reduce(
           return withoutKey;
         }, state)(state)
       );
+
     case DEMOTE_OBJECT_TO_ARRAY:
       return narrow(
         onObject(
@@ -205,16 +249,12 @@ export default function reduce(
           state
         )(state)
       );
-    case ADD_TO_ARRAY:
-      onArray(() => {
-        state.splice(action.payload.index, 0, narrow(action.payload.element));
-      })(state);
-      return;
-    case ADD_KEY_VALUE_TO_OBJECT:
-      onObject(() => {
+
+    case SET_KEY_VALUE_IN_OBJECT:
+      return onObject(() => {
         state[action.payload.key] = action.payload.value;
       })(state);
-      return;
+
     default:
       return action.payload || state;
   }
