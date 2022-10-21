@@ -142,7 +142,7 @@ export default function reduce(
   action = { type: NARROW, payload: undefined, path: [], recursive: false }
 ) {
   console.log({
-    ...structuredClone(action),
+    action: structuredClone(action),
     state: JSON.parse(JSON.stringify(state)),
   });
   const recur = (state, action) => {
@@ -211,8 +211,12 @@ export default function reduce(
     case DELETE_FROM_ARRAY:
       return onArray(() => {
         if (state.length === 2) {
-          const index = action.payload;
-          return narrow(state.slice(0, index).concat(state.slice(index + 1)));
+          switch (Number.parseInt(action.payload)) {
+            case 0:
+              return narrow(state[1]);
+            case 1:
+              return narrow(state[0]);
+          }
         }
         state.splice(action.payload, 1);
       }, state)(state);

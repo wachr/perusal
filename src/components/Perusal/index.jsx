@@ -13,7 +13,7 @@ import { ArrayActions, ArrayContent } from "./Arrays";
 import EmptyActions from "./EmptyActions";
 import { ObjectActions, ObjectContent } from "./Objects";
 import { StringActions, StringContent } from "./Strings";
-import reducer, { Randomize } from "./reducer";
+import reducer, { Narrow, Randomize } from "./reducer";
 
 const Perusal = ({ nodeState, dispatch, setNode, displayTodoAlert }) => {
   return (
@@ -38,6 +38,7 @@ const Perusal = ({ nodeState, dispatch, setNode, displayTodoAlert }) => {
           <CardActions>
             <Button onClick={() => dispatch(Randomize())}>Randomize</Button>
             <Button onClick={() => setNode({})}>Clear</Button>
+            <Button onClick={() => dispatch(Narrow())}>Simplify</Button>
             <Divider orientation="vertical" flexItem />
             <EmptyActions nodeState={nodeState} dispatch={dispatch} />
             <StringActions
