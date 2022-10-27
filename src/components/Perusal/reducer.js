@@ -13,35 +13,33 @@ function generateRandomPerusal(size = 5) {
   switch (randomIntExclusive(3)) {
     case 2:
       return Object.fromEntries(
-        Array(randomIntExclusive(size))
-          .fill(0)
-          .map(() => [
-            generateRandomPerusal(0),
-            generateRandomPerusal(size - 1),
-          ])
+        Array.from(Array(randomIntExclusive(size))).map(() => [
+          generateRandomPerusal(0),
+          generateRandomPerusal(size - 1),
+        ])
       );
     case 1:
-      return Array(randomIntExclusive(size / 2) + 2)
-        .fill(0)
-        .map(() => generateRandomPerusal(size - 1))
-        .flat();
+      return Array.from(Array(randomIntExclusive(size / 2) + 2)).flatMap(() =>
+        generateRandomPerusal(size - 1)
+      );
     default:
       return generateRandomPerusal(0);
   }
 }
 
-function partition(condition) {
-  return (arr) =>
-    !Array.isArray(arr)
-      ? []
-      : arr.reduce(
-          ([pass, fail], elem) =>
-            condition(elem) ? [[...pass, elem], fail] : [pass, [...fail, elem]],
-          [[], []]
-        );
-}
-
 function narrow(state) {
+  function partition(condition) {
+    return (arr) =>
+      !Array.isArray(arr)
+        ? []
+        : arr.reduce(
+            ([pass, fail], elem) =>
+              condition(elem)
+                ? [[...pass, elem], fail]
+                : [pass, [...fail, elem]],
+            [[], []]
+          );
+  }
   return combine(
     onEmpty(() => ({})),
     onString(() => state),
