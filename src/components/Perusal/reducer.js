@@ -1,3 +1,4 @@
+import trampoline from "../../utils/trampoline";
 import { nolookalikesSafe } from "nanoid-dictionary";
 import { customAlphabet } from "nanoid/non-secure";
 
@@ -137,7 +138,7 @@ export function withPath(...pathParts) {
   };
 }
 
-export default function reduce(
+const reduce = trampoline(function _reduce(
   state,
   action = { type: NARROW, payload: undefined, path: [], recursive: false }
 ) {
@@ -145,10 +146,10 @@ export default function reduce(
     action: structuredClone(action),
     state: JSON.parse(JSON.stringify(state)),
   });
-  const recur = (state, action) => {
+  function recur(state, action) {
     action.recursive = true;
-    return reduce(state, action);
-  };
+    return () => _reduce(state, action);
+  }
   const path = Array.isArray(action.path) && action.path[0];
   if (Array.isArray(action.path) && action.path.length > 1) {
     action.path.shift();
@@ -262,4 +263,6 @@ export default function reduce(
     default:
       return action.payload || state;
   }
-}
+});
+
+export default reduce;
