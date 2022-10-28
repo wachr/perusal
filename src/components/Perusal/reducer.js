@@ -144,12 +144,21 @@ const reduce = trampoline(function _reduce(
     action: structuredClone(action),
     state: JSON.parse(JSON.stringify(state)),
   });
+  function followPath(state, action) {
+    return (
+      Array.isArray(action.path) &&
+      action.path.length > 1 &&
+      (!Array.isArray(state) ||
+        state.length > 2 ||
+        ![DELETE_STRING].includes(action.type))
+    );
+  }
   function recur(state, action) {
     action.recursive = true;
     return () => _reduce(state, action);
   }
   const path = Array.isArray(action.path) && action.path[0];
-  if (Array.isArray(action.path) && action.path.length > 1) {
+  if (followPath(state, action)) {
     action.path.shift();
     return recur(state[path], action);
   }
@@ -184,9 +193,12 @@ const reduce = trampoline(function _reduce(
     case DELETE_STRING:
       return combine(
         onString(() => narrow("")),
-        onArray(() => {
-          if (!!path) return recur(state, DeleteFromArray(path));
-        }),
+        onArray(() =>
+          recur(
+            state,
+            withPath(...action.path)(DeleteFromArray(action.path[-1]))
+          )
+        ),
         onObject(() => {
           if (!!path)
             return recur(state, SetKeyValueInObject(path, narrow("")));
@@ -238,11 +250,16 @@ const reduce = trampoline(function _reduce(
     }
 
     case DELETE_KEY_FROM_OBJECT:
-      return narrow(
+      return combine(
+        onArray(() => {
+          if (!path) return;
+          const newElement = recur(state[path], action);
+          if (newElement) state.splice(path, 1, newElement);
+        }),
         onObject(() => {
           const { [action.payload]: _, ...withoutKey } = state;
-          return withoutKey;
-        }, state)(state)
+          return narrow(withoutKey);
+        })(state, state)
       );
 
     case DEMOTE_OBJECT_TO_ARRAY:
@@ -254,9 +271,10 @@ const reduce = trampoline(function _reduce(
       );
 
     case SET_KEY_VALUE_IN_OBJECT:
-      return onObject(() => {
-        state[action.payload.key] = action.payload.value;
-      })(state);
+      return combine(
+        onArray(() => recur(state[path], action)),
+        onObject(() => void (state[action.payload.key] = action.payload.value))
+      )(state, state);
 
     default:
       return action.payload || state;
