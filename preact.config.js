@@ -12,7 +12,8 @@ export default {
 
     // Conditionally use polling to work around filesystem limitations
     // https://webpack.js.org/configuration/watch/#watchoptionspoll
-    if (process.env.USE_NFS_POLLING) config.devServer.watchOptions.poll = 1500;
+    if (process.env.USE_NFS_POLLING === "true")
+      config.devServer.watchOptions.poll = 1500;
 
     if (!config.resolve) config.resolve = {};
     if (!config.resolve.alias) config.resolve.alias = {};

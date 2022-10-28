@@ -1,3 +1,4 @@
+import trampoline from "../../utils/trampoline";
 import { nolookalikesSafe } from "nanoid-dictionary";
 import { customAlphabet } from "nanoid/non-secure";
 
@@ -12,35 +13,33 @@ function generateRandomPerusal(size = 5) {
   switch (randomIntExclusive(3)) {
     case 2:
       return Object.fromEntries(
-        Array(randomIntExclusive(size))
-          .fill(0)
-          .map(() => [
-            generateRandomPerusal(0),
-            generateRandomPerusal(size - 1),
-          ])
+        Array.from(Array(randomIntExclusive(size))).map(() => [
+          generateRandomPerusal(0),
+          generateRandomPerusal(size - 1),
+        ])
       );
     case 1:
-      return Array(randomIntExclusive(size) + 2)
-        .fill(0)
-        .map(() => generateRandomPerusal(size - 1))
-        .flat();
+      return Array.from(Array(randomIntExclusive(size / 2) + 2)).flatMap(() =>
+        generateRandomPerusal(size - 1)
+      );
     default:
       return generateRandomPerusal(0);
   }
 }
 
-function partition(condition) {
-  return (arr) =>
-    !Array.isArray(arr)
-      ? []
-      : arr.reduce(
-          ([pass, fail], elem) =>
-            condition(elem) ? [[...pass, elem], fail] : [pass, [...fail, elem]],
-          [[], []]
-        );
-}
-
 function narrow(state) {
+  function partition(condition) {
+    return (arr) =>
+      !Array.isArray(arr)
+        ? []
+        : arr.reduce(
+            ([pass, fail], elem) =>
+              condition(elem)
+                ? [[...pass, elem], fail]
+                : [pass, [...fail, elem]],
+            [[], []]
+          );
+  }
   return combine(
     onEmpty(() => ({})),
     onString(() => state),
@@ -73,11 +72,12 @@ const PROMOTE_EMPTY_TO_STRING = "promote-empty-to-string";
 const REPLACE_STRING = "replace-string";
 const DELETE_STRING = "delete-string";
 const PROMOTE_STRING_TO_ARRAY = "promote-string-to-array";
+const ADD_TO_ARRAY = "add-to-array";
 const DELETE_FROM_ARRAY = "delete-from-array";
 const PROMOTE_STRING_TO_OBJECT = "promote-string-to-object";
 const DELETE_KEY_FROM_OBJECT = "delete-key-from-object";
 const DEMOTE_OBJECT_TO_ARRAY = "demote-object-to-array";
-const ADD_TO_ARRAY = "add-to-array";
+const SET_KEY_VALUE_IN_OBJECT = "set-key-value-in-object";
 
 export function Narrow() {
   return { type: NARROW };
@@ -103,6 +103,10 @@ export function PromoteStringToArray(str) {
   return { type: PROMOTE_STRING_TO_ARRAY, payload: str };
 }
 
+export function AddToArray(index, element) {
+  return { type: ADD_TO_ARRAY, payload: { index, element } };
+}
+
 export function DeleteFromArray(ind) {
   return { type: DELETE_FROM_ARRAY, payload: ind };
 }
@@ -119,39 +123,88 @@ export function DemoteObjectToArray() {
   return { type: DEMOTE_OBJECT_TO_ARRAY };
 }
 
-export function AddToArray(index, element) {
-  return { type: ADD_TO_ARRAY, payload: { index, element } };
+export function SetKeyValueInObject(key, value) {
+  return { type: SET_KEY_VALUE_IN_OBJECT, payload: { key, value } };
 }
 
-export default function reduce(
+export function withPath(...pathParts) {
+  return (action) => {
+    !!action.path
+      ? action.path.unshift(...pathParts)
+      : (action.path = pathParts);
+    return action;
+  };
+}
+
+const reduce = trampoline(function _reduce(
   state,
-  action = { type: NARROW, payload: undefined, path: [] }
+  action = { type: NARROW, payload: undefined, path: [], recursive: false }
 ) {
   console.log({
-    ...structuredClone(action),
+    action: structuredClone(action),
     state: JSON.parse(JSON.stringify(state)),
   });
+  function followPath(state, action) {
+    return (
+      Array.isArray(action.path) &&
+      action.path.length > 1 &&
+      (!Array.isArray(state) ||
+        state.length > 2 ||
+        ![DELETE_STRING].includes(action.type))
+    );
+  }
+  function recur(state, action) {
+    action.recursive = true;
+    return () => _reduce(state, action);
+  }
   const path = Array.isArray(action.path) && action.path[0];
-  if (Array.isArray(action.path) && action.path.length > 1) {
+  if (followPath(state, action)) {
     action.path.shift();
-    return reduce(state[path], action);
+    return recur(state[path], action);
   }
   switch (action.type) {
     case NARROW:
       return narrow(state);
+
     case RANDOMIZE:
       return narrow(generateRandomPerusal());
-    case PROMOTE_EMPTY_TO_STRING:
-      return narrow(onEmpty(() => String(action.payload), state)(state)); // Coerce to string primitive
+
+    case PROMOTE_EMPTY_TO_STRING: {
+      const newString = narrow(String(action.payload));
+      return combine(
+        onEmpty(() => newString),
+        onObject(() => {
+          if (!!path) state[path] = newString;
+        })
+      )(state, state);
+    }
+
     case REPLACE_STRING: {
       const newString = narrow(String(action.payload));
       return combine(
         onString(() => newString),
-        onArray(() => void state.splice(path, 1, newString))
+        onArray(() => void state.splice(path, 1, newString)),
+        onObject(() => {
+          state[path] = newString;
+        })
       )(state, state);
     }
+
     case DELETE_STRING:
-      return narrow(onString(() => "", state)(state));
+      return combine(
+        onString(() => narrow("")),
+        onArray(() =>
+          recur(
+            state,
+            withPath(...action.path)(DeleteFromArray(action.path[-1]))
+          )
+        ),
+        onObject(() => {
+          if (!!path)
+            return recur(state, SetKeyValueInObject(path, narrow("")));
+        })
+      )(state, state);
+
     case PROMOTE_STRING_TO_ARRAY: {
       const newString = narrow(String(action.payload));
       return combine(
@@ -159,29 +212,56 @@ export default function reduce(
         onArray(() => void state.splice(path, 1, [state[path], newString]))
       )(state, state);
     }
+
+    case ADD_TO_ARRAY:
+      onArray(() => {
+        state.splice(action.payload.index, 0, narrow(action.payload.element));
+      })(state);
+      return;
+
     case DELETE_FROM_ARRAY:
       return onArray(() => {
         if (state.length === 2) {
-          const index = action.payload;
-          return narrow(state.slice(0, index).concat(state.slice(index + 1)));
+          switch (Number.parseInt(action.payload)) {
+            case 0:
+              return narrow(state[1]);
+            case 1:
+              return narrow(state[0]);
+          }
         }
         state.splice(action.payload, 1);
       }, state)(state);
+
     case PROMOTE_STRING_TO_OBJECT: {
       return combine(
         onString(() => ({ [state]: narrow(action.payload) })),
         onArray(() => {
           state.splice(path, 1, { [state[path]]: narrow(action.payload) });
+        }),
+        onObject(() => {
+          const newKey = path;
+          const newValue = { [state[path]]: narrow(String(action.payload)) };
+          const newAction = withPath(path)(
+            SetKeyValueInObject(newKey, newValue)
+          );
+          return recur(state, newAction);
         })
       )(state, state);
     }
+
     case DELETE_KEY_FROM_OBJECT:
-      return narrow(
+      return combine(
+        onArray(() => {
+          if (!path) return;
+          const newElement = recur(state[path], action);
+          if (newElement) state.splice(path, 1, newElement);
+        }),
         onObject(() => {
           const { [action.payload]: _, ...withoutKey } = state;
-          return withoutKey;
-        }, state)(state)
+          return narrow(withoutKey);
+        })(state, state)
       );
+
     case DEMOTE_OBJECT_TO_ARRAY:
       return narrow(
         onObject(
@@ -189,12 +269,16 @@ export default function reduce(
           state
         )(state)
       );
-    case ADD_TO_ARRAY:
-      onArray(() => {
-        state.splice(action.payload.index, 0, narrow(action.payload.element));
-      })(state);
-      return;
+
+    case SET_KEY_VALUE_IN_OBJECT:
+      return combine(
+        onArray(() => recur(state[path], action)),
+        onObject(() => void (state[action.payload.key] = action.payload.value))
+      )(state, state);
+
     default:
       return action.payload || state;
   }
-}
+});
+
+export default reduce;

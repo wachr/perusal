@@ -5,6 +5,7 @@ import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardActions from "@mui/material/CardActions";
 import CardContent from "@mui/material/CardContent";
+import Divider from "@mui/material/Divider";
 import Paper from "@mui/material/Paper";
 import PropTypes from "prop-types";
 
@@ -12,7 +13,7 @@ import { ArrayActions, ArrayContent } from "./Arrays";
 import EmptyActions from "./EmptyActions";
 import { ObjectActions, ObjectContent } from "./Objects";
 import { StringActions, StringContent } from "./Strings";
-import reducer, { Randomize } from "./reducer";
+import reducer, { Narrow, Randomize } from "./reducer";
 
 const Perusal = ({ nodeState, dispatch, setNode, displayTodoAlert }) => {
   return (
@@ -20,22 +21,26 @@ const Perusal = ({ nodeState, dispatch, setNode, displayTodoAlert }) => {
       <Paper variant="outlined">
         <Card>
           <CardContent>
-            <StringContent nodeState={nodeState} />
-            <ArrayContent
-              nodeState={nodeState}
-              dispatch={dispatch}
-              displayTodoAlert={displayTodoAlert}
-            />
-            <ObjectContent
-              nodeState={nodeState}
-              dispatch={dispatch}
-              displayTodoAlert={displayTodoAlert}
-            />
+            <Paper>
+              <StringContent nodeState={nodeState} />
+              <ArrayContent
+                nodeState={nodeState}
+                dispatch={dispatch}
+                displayTodoAlert={displayTodoAlert}
+              />
+              <ObjectContent
+                nodeState={nodeState}
+                dispatch={dispatch}
+                displayTodoAlert={displayTodoAlert}
+              />
+            </Paper>
           </CardContent>
           <CardActions>
             <Button onClick={() => dispatch(Randomize())}>Randomize</Button>
             <Button onClick={() => setNode({})}>Clear</Button>
-            <EmptyActions nodeState={nodeState} setNode={setNode} />
+            <Button onClick={() => dispatch(Narrow())}>Simplify</Button>
+            <Divider orientation="vertical" flexItem />
+            <EmptyActions nodeState={nodeState} dispatch={dispatch} />
             <StringActions
               nodeState={nodeState}
               dispatch={dispatch}
