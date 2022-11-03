@@ -74,6 +74,7 @@ const DELETE_STRING = "delete-string";
 const PROMOTE_STRING_TO_ARRAY = "promote-string-to-array";
 const ADD_TO_ARRAY = "add-to-array";
 const DELETE_FROM_ARRAY = "delete-from-array";
+const REPLACE_IN_ARRAY = "replace-in-array";
 const PROMOTE_STRING_TO_OBJECT = "promote-string-to-object";
 const DELETE_KEY_FROM_OBJECT = "delete-key-from-object";
 const DEMOTE_OBJECT_TO_ARRAY = "demote-object-to-array";
@@ -107,8 +108,12 @@ export function AddToArray(index, element) {
   return { type: ADD_TO_ARRAY, payload: { index, element } };
 }
 
-export function DeleteFromArray(ind) {
-  return { type: DELETE_FROM_ARRAY, payload: ind };
+export function DeleteFromArray(index) {
+  return { type: DELETE_FROM_ARRAY, payload: index };
+}
+
+export function ReplaceInArray(index, element) {
+  return { type: REPLACE_IN_ARRAY, payload: { index, element } };
 }
 
 export function PromoteStringToObject(str) {
@@ -214,9 +219,15 @@ const reduce = trampoline(function _reduce(
     }
 
     case ADD_TO_ARRAY:
-      onArray(() => {
-        state.splice(action.payload.index, 0, narrow(action.payload.element));
-      })(state);
+      onArray(
+        () =>
+          void state.splice(
+            action.payload.index,
+            0,
+            narrow(action.payload.element)
+          ),
+        state
+      )(state);
       return;
 
     case DELETE_FROM_ARRAY:
@@ -231,6 +242,18 @@ const reduce = trampoline(function _reduce(
         }
         state.splice(action.payload, 1);
       }, state)(state);
+
+    case REPLACE_IN_ARRAY:
+      onArray(
+        () =>
+          void state.splice(
+            action.payload.index,
+            1,
+            narrow(action.payload.element)
+          ),
+        state
+      )(state);
+      return;
 
     case PROMOTE_STRING_TO_OBJECT: {
       return combine(
@@ -249,18 +272,25 @@ const reduce = trampoline(function _reduce(
       )(state, state);
     }
 
-    case DELETE_KEY_FROM_OBJECT:
-      return combine(
-        onArray(() => {
-          if (!path) return;
-          const newElement = recur(state[path], action);
-          if (newElement) state.splice(path, 1, newElement);
-        }),
-        onObject(() => {
-          const { [action.payload]: _, ...withoutKey } = state;
+    case DELETE_KEY_FROM_OBJECT: {
+      function deleteKey(obj) {
+        return onObject(() => {
+          const { [action.payload]: _, ...withoutKey } = obj;
           return narrow(withoutKey);
-        })(state, state)
-      );
+        }, obj)(obj);
+      }
+      return combine(
+        onArray(() =>
+          recur(
+            state,
+            withPath(...action.path)(
+              ReplaceInArray(action.path[-1], deleteKey(state[action.path[-1]]))
+            )
+          )
+        ),
+        onObject(() => deleteKey(state))
+      )(state, state);
+    }
 
     case DEMOTE_OBJECT_TO_ARRAY:
       return narrow(
