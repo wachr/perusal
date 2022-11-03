@@ -145,10 +145,11 @@ const reduce = trampoline(function _reduce(
   state,
   action = { type: NARROW, payload: undefined, path: [], recursive: false }
 ) {
-  console.log({
-    action: structuredClone(action),
-    state: JSON.parse(JSON.stringify(state)),
-  });
+  if (!!global.structuredClone)
+    console.log({
+      action: structuredClone(action),
+      state: JSON.parse(JSON.stringify(state)),
+    });
   function followPath(state, action) {
     return (
       Array.isArray(action.path) &&
@@ -201,7 +202,7 @@ const reduce = trampoline(function _reduce(
         onArray(() =>
           recur(
             state,
-            withPath(...action.path)(DeleteFromArray(action.path[-1]))
+            withPath(...action.path)(DeleteFromArray(action.path.slice(-1)))
           )
         ),
         onObject(() => {
@@ -244,16 +245,18 @@ const reduce = trampoline(function _reduce(
       }, state)(state);
 
     case REPLACE_IN_ARRAY:
-      onArray(
-        () =>
-          void state.splice(
-            action.payload.index,
-            1,
-            narrow(action.payload.element)
-          ),
-        state
-      )(state);
-      return;
+      return onArray(() =>
+        isEmpty(action.payload.element)
+          ? recur(
+              state,
+              withPath(...action.path)(DeleteFromArray(action.payload.index))
+            )
+          : void state.splice(
+              action.payload.index,
+              1,
+              narrow(action.payload.element)
+            )
+      )(state, state);
 
     case PROMOTE_STRING_TO_OBJECT: {
       return combine(
@@ -273,22 +276,24 @@ const reduce = trampoline(function _reduce(
     }
 
     case DELETE_KEY_FROM_OBJECT: {
-      function deleteKey(obj) {
-        return onObject(() => {
-          const { [action.payload]: _, ...withoutKey } = obj;
-          return narrow(withoutKey);
-        }, obj)(obj);
+      function withoutKey(obj, key) {
+        if (!obj) return narrow({});
+        const { [key]: _, ...withoutKey } = obj;
+        return narrow(withoutKey);
       }
       return combine(
         onArray(() =>
           recur(
             state,
-            withPath(...action.path)(
-              ReplaceInArray(action.path[-1], deleteKey(state[action.path[-1]]))
+            withPath(...action.path.slice(0, -1))(
+              ReplaceInArray(
+                action.path.slice(-1),
+                withoutKey(state[action.path.slice(-1)], action.payload)
+              )
             )
           )
         ),
-        onObject(() => deleteKey(state))
+        onObject(() => withoutKey(state, action.payload))
       )(state, state);
     }
 
@@ -309,6 +314,11 @@ const reduce = trampoline(function _reduce(
     default:
       return action.payload || state;
   }
+});
+
+Object.defineProperty(reduce, "name", {
+  value: "reduce",
+  writable: false,
 });
 
 export default reduce;

@@ -9,6 +9,7 @@ import reduce, {
   PromoteStringToArray,
   PromoteStringToObject,
   ReplaceString,
+  withPath,
 } from "./reducer";
 
 describe(reduce.name, () => {
@@ -171,6 +172,18 @@ describe(reduce.name, () => {
       [{ a: { b: "" } }, { a: "b" }],
     ])("narrows objects %#", (input, output) => {
       expect(reduce(input, Narrow())).toEqual(output);
+    });
+  });
+
+  describe.only("reproducing user testing", () => {
+    global.structuredClone = jest.fn((obj) => JSON.parse(JSON.stringify(obj)));
+
+    it("can delete key from object inside array", () => {
+      const startState = [{ a: "foo", b: "bar" }];
+      const action = withPath("0")(DeleteFromObject("a"));
+      const endState = [{ b: "bar" }];
+      expect(reduce(startState, action)).toBeUndefined();
+      expect(startState).toEqual(endState);
     });
   });
 });
