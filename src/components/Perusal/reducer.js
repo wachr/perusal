@@ -74,6 +74,7 @@ const DELETE_STRING = "delete-string";
 const PROMOTE_STRING_TO_ARRAY = "promote-string-to-array";
 const ADD_TO_ARRAY = "add-to-array";
 const DELETE_FROM_ARRAY = "delete-from-array";
+const REPLACE_IN_ARRAY = "replace-in-array";
 const PROMOTE_STRING_TO_OBJECT = "promote-string-to-object";
 const DELETE_KEY_FROM_OBJECT = "delete-key-from-object";
 const DEMOTE_OBJECT_TO_ARRAY = "demote-object-to-array";
@@ -107,8 +108,12 @@ export function AddToArray(index, element) {
   return { type: ADD_TO_ARRAY, payload: { index, element } };
 }
 
-export function DeleteFromArray(ind) {
-  return { type: DELETE_FROM_ARRAY, payload: ind };
+export function DeleteFromArray(index) {
+  return { type: DELETE_FROM_ARRAY, payload: index };
+}
+
+export function ReplaceInArray(index, element) {
+  return { type: REPLACE_IN_ARRAY, payload: { index, element } };
 }
 
 export function PromoteStringToObject(str) {
@@ -140,10 +145,11 @@ const reduce = trampoline(function _reduce(
   state,
   action = { type: NARROW, payload: undefined, path: [], recursive: false }
 ) {
-  console.log({
-    action: structuredClone(action),
-    state: JSON.parse(JSON.stringify(state)),
-  });
+  if (!!global.structuredClone)
+    console.log({
+      action: structuredClone(action),
+      state: JSON.parse(JSON.stringify(state)),
+    });
   function followPath(state, action) {
     return (
       Array.isArray(action.path) &&
@@ -196,7 +202,7 @@ const reduce = trampoline(function _reduce(
         onArray(() =>
           recur(
             state,
-            withPath(...action.path)(DeleteFromArray(action.path[-1]))
+            withPath(...action.path)(DeleteFromArray(action.path.slice(-1)))
           )
         ),
         onObject(() => {
@@ -214,9 +220,15 @@ const reduce = trampoline(function _reduce(
     }
 
     case ADD_TO_ARRAY:
-      onArray(() => {
-        state.splice(action.payload.index, 0, narrow(action.payload.element));
-      })(state);
+      onArray(
+        () =>
+          void state.splice(
+            action.payload.index,
+            0,
+            narrow(action.payload.element)
+          ),
+        state
+      )(state);
       return;
 
     case DELETE_FROM_ARRAY:
@@ -231,6 +243,20 @@ const reduce = trampoline(function _reduce(
         }
         state.splice(action.payload, 1);
       }, state)(state);
+
+    case REPLACE_IN_ARRAY:
+      return onArray(() =>
+        isEmpty(action.payload.element)
+          ? recur(
+              state,
+              withPath(...action.path)(DeleteFromArray(action.payload.index))
+            )
+          : void state.splice(
+              action.payload.index,
+              1,
+              narrow(action.payload.element)
+            )
+      )(state, state);
 
     case PROMOTE_STRING_TO_OBJECT: {
       return combine(
@@ -249,18 +275,27 @@ const reduce = trampoline(function _reduce(
       )(state, state);
     }
 
-    case DELETE_KEY_FROM_OBJECT:
+    case DELETE_KEY_FROM_OBJECT: {
+      function withoutKey(obj, key) {
+        if (!obj) return narrow({});
+        const { [key]: _, ...withoutKey } = obj;
+        return narrow(withoutKey);
+      }
       return combine(
-        onArray(() => {
-          if (!path) return;
-          const newElement = recur(state[path], action);
-          if (newElement) state.splice(path, 1, newElement);
-        }),
-        onObject(() => {
-          const { [action.payload]: _, ...withoutKey } = state;
-          return narrow(withoutKey);
-        })(state, state)
-      );
+        onArray(() =>
+          recur(
+            state,
+            withPath(...action.path.slice(0, -1))(
+              ReplaceInArray(
+                action.path.slice(-1),
+                withoutKey(state[action.path.slice(-1)], action.payload)
+              )
+            )
+          )
+        ),
+        onObject(() => withoutKey(state, action.payload))
+      )(state, state);
+    }
 
     case DEMOTE_OBJECT_TO_ARRAY:
       return narrow(
@@ -279,6 +314,11 @@ const reduce = trampoline(function _reduce(
     default:
       return action.payload || state;
   }
+});
+
+Object.defineProperty(reduce, "name", {
+  value: "reduce",
+  writable: false,
 });
 
 export default reduce;
