@@ -42,6 +42,13 @@ describe(reduce.name, () => {
     expect(reduce("foo", DeleteString())).toStrictEqual({});
   });
 
+  it.only("should delete a string from an array of strings", () => {
+    global.structuredClone = jest.fn((obj) => JSON.parse(JSON.stringify(obj)));
+    expect(reduce([" ", " "], withPath(0)(DeleteString()))).toStrictEqual([
+      " ",
+    ]);
+  });
+
   it("should delete from an array", () => {
     const array = ["a", "b", "c", "d", "e"];
     expect(reduce(array, DeleteFromArray(2))).toBeUndefined();
@@ -175,7 +182,7 @@ describe(reduce.name, () => {
     });
   });
 
-  describe.only("reproducing user testing", () => {
+  describe("reproducing user testing", () => {
     global.structuredClone = jest.fn((obj) => JSON.parse(JSON.stringify(obj)));
 
     it("can delete key from object inside array", () => {

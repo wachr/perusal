@@ -199,12 +199,13 @@ const reduce = trampoline(function _reduce(
     case DELETE_STRING:
       return combine(
         onString(() => narrow("")),
-        onArray(() =>
-          recur(
-            state,
-            withPath(...action.path)(DeleteFromArray(action.path.slice(-1)))
-          )
-        ),
+        onArray(() => {
+          if (!!path)
+            return recur(
+              state,
+              withPath(...action.path)(DeleteFromArray(action.path.slice(-1)))
+            );
+        }),
         onObject(() => {
           if (!!path)
             return recur(state, SetKeyValueInObject(path, narrow("")));
