@@ -1,0 +1,11 @@
+services:
+  test-debug:
+    build: .
+    network_mode: "host"
+    ports:
+      - "9229:9229"
+    volumes:
+      - .:/home/node/perusal
+    command: "test:debug"
+    profiles:
+      - "test-debug"
