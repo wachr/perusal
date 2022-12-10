@@ -1,12 +1,15 @@
 services:
   dev-server:
     build: .
+    volumes:
+      - .:/home/node/perusal
     ports:
       - "8080:8080"
     environment:
       - USE_NFS_POLLING=${USE_NFS_POLLING:-false}
-    volumes:
-      - .:/home/node/perusal
+    command: "dev"
+    profiles:
+      - serve
   watcher:
     build: .
     volumes:
@@ -14,6 +17,16 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=${CHOKIDAR_USEPOLLING:-0}
       - CHOKIDAR_INTERVAL
-    command: ["watch"]
+    command: "watch"
     profiles:
       - watch
+  debugger:
+    build: .
+    volumes:
+      - .:/home/node/perusal
+    ports:
+      - "9229:9229"
+    network_mode: "host"
+    command: "test:debug"
+    profiles:
+      - debug
