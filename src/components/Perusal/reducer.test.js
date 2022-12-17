@@ -12,6 +12,10 @@ import reduce, {
   withPath,
 } from "./reducer";
 
+beforeAll(() => {
+  // global.structuredClone = jest.fn((obj) => JSON.parse(JSON.stringify(obj)));
+});
+
 describe(reduce.name, () => {
   test.each(["", {}, []])("should narrow empty %p to {}", (empty) => {
     expect(reduce(empty, Narrow())).toStrictEqual({});
@@ -42,11 +46,8 @@ describe(reduce.name, () => {
     expect(reduce("foo", DeleteString())).toStrictEqual({});
   });
 
-  it.only("should delete a string from an array of strings", () => {
-    global.structuredClone = jest.fn((obj) => JSON.parse(JSON.stringify(obj)));
-    expect(reduce([" ", " "], withPath(0)(DeleteString()))).toStrictEqual([
-      " ",
-    ]);
+  it("should delete a string from an array of strings", () => {
+    expect(reduce([" ", " "], withPath(0)(DeleteString()))).toStrictEqual(" ");
   });
 
   it("should delete from an array", () => {
@@ -183,8 +184,6 @@ describe(reduce.name, () => {
   });
 
   describe("reproducing user testing", () => {
-    global.structuredClone = jest.fn((obj) => JSON.parse(JSON.stringify(obj)));
-
     it("can delete key from object inside array", () => {
       const startState = [{ a: "foo", b: "bar" }];
       const action = withPath("0")(DeleteFromObject("a"));

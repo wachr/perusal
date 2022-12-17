@@ -200,7 +200,7 @@ const reduce = trampoline(function _reduce(
       return combine(
         onString(() => narrow("")),
         onArray(() => {
-          if (!!path)
+          if (path !== undefined || path !== null)
             return recur(
               state,
               withPath(...action.path)(DeleteFromArray(action.path.slice(-1)))
@@ -216,7 +216,9 @@ const reduce = trampoline(function _reduce(
       const newString = narrow(String(action.payload));
       return combine(
         onString(() => [state, newString]),
-        onArray(() => void state.splice(path, 1, [state[path], newString]))
+        onArray((_, unit) =>
+          path ? void state.splice(path, 1, [state[path], newString]) : unit
+        )
       )(state, state);
     }
 

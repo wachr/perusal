@@ -7,7 +7,7 @@ import reduce, { DeleteString, withPath } from "./reducer";
 describe(reduce.name, () => {
   describe(DeleteString.name, () => {
     const nonEmptyString = fc.string({ minLength: 1 });
-    const nonEmptyArray = (arb) => fc.array(arb, { minLength: 1 });
+    const nonEmptyArray = (arb) => fc.uniqueArray(arb, { minLength: 1 });
     const nonEmptyObject = (arb) =>
       fc.dictionary(nonEmptyString, arb, { minKeys: 1 });
     it("on strings", () => {
