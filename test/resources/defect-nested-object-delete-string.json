@@ -1,5 +1,4 @@
 {
-  // Does not produce the expected final state
   "action": {
     "type": "delete-string",
     "path": ["0", "8DWRrcwhc", "njJBM9"]
@@ -8,6 +7,14 @@
     {
       "8DWRrcwhc": {
         "njJBM9": "nWKm"
+      }
+    },
+    ["NKCJFdct", "7mQR2"]
+  ],
+  "expected": [
+    {
+      "8DWRrcwhc": {
+        "njJBM9": {}
       }
     },
     ["NKCJFdct", "7mQR2"]
