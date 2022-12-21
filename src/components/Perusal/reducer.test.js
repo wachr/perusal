@@ -194,7 +194,7 @@ describe(reduce.name, () => {
 
     it.only("addresses nested object delete string defect", async () => {
       const defect = await import(
-        "../../../test/resources/defect-nested-object-delete-string.json"
+        "../../test/resources/defect-nested-object-delete-string.json"
       );
       const result = reduce(defect.state, defect.action);
       if (result !== undefined) expect(result).toBe(defect.expected);
