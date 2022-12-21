@@ -47,7 +47,9 @@ describe(reduce.name, () => {
   });
 
   it("should delete a string from an array of strings", () => {
-    expect(reduce([" ", " "], withPath(0)(DeleteString()))).toStrictEqual(" ");
+    const state = [" ", " "];
+    expect(reduce(state, withPath(0)(DeleteString()))).toBe(undefined);
+    expect(state).toStrictEqual([" "]);
   });
 
   it("should delete from an array", () => {
@@ -192,9 +194,18 @@ describe(reduce.name, () => {
       expect(startState).toEqual(endState);
     });
 
-    it.only("addresses nested object delete string defect", async () => {
+    it("addresses nested object delete string defect", async () => {
       const defect = await import(
-        "../../test/resources/defect-nested-object-delete-string.json"
+        "../../test/resources/defects/nested-object-delete-string.json"
+      );
+      const result = reduce(defect.state, defect.action);
+      if (result !== undefined) expect(result).toBe(defect.expected);
+      else expect(defect.state).toStrictEqual(defect.expected);
+    });
+
+    it.only("handles nested singleton array string deletion", async () => {
+      const defect = await import(
+        "../../test/resources/defects/nested-singleton-array-delete-string.json"
       );
       const result = reduce(defect.state, defect.action);
       if (result !== undefined) expect(result).toBe(defect.expected);

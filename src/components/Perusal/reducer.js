@@ -200,16 +200,17 @@ const reduce = trampoline(function _reduce(
       return combine(
         onString(() => narrow("")),
         onArray(() => {
-          if (path !== undefined || path !== null)
-            if (action.path.length > 1)
+          if (path !== undefined && path !== null && path !== false) {
+            if (action?.path?.length > 1)
               return recur(
                 state[path],
                 withPath(...action.path.slice(1))(DeleteString())
               );
-          return recur(
-            state,
-            withPath(...action.path)(DeleteFromArray(action.path.slice(1)))
-          );
+            return recur(
+              state,
+              withPath(...action.path)(DeleteFromArray(action.path.slice(1)))
+            );
+          }
         }),
         onObject(() => {
           if (!!path)

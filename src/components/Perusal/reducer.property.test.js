@@ -41,13 +41,13 @@ describe(reduce.name, () => {
           expect(nextState || []).not.toContain(arr[index]);
           arr.length === 1
             ? expect(isEmpty(nextState)).toBe(true)
-            : expect(nextState).toEqual(expect.arrayContaining(arr));
+            : expect(nextState === undefined ? arr : nextState).toEqual(
+                expect.arrayContaining(arr)
+              );
         })
       );
     });
 
-    it.skip("on objects of strings", () => {
-      throw Error("not yet implemented");
-    });
+    it.todo("on objects of strings");
   });
 });
