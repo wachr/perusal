@@ -27,5 +27,59 @@
     "action": { "type": "delete-string" },
     "state": [[" "]],
     "expected": [[" "]]
+  },
+  {
+    "title": "promote string to array in deeply nested object",
+    "action": {
+      "type": "promote-string-to-array",
+      "payload": "54N-e",
+      "path": ["3", "0", "Mkrwb8PnFJ", "1", "USkFO"]
+    },
+    "state": [
+      "T9w8",
+      "f6dfTbL",
+      "Cb9gfFQcpTt",
+      [
+        {
+          "Mkrwb8PnFJ": [
+            "MTn7FcWF",
+            {
+              " tfgrrRbbHQh": "fEXN1",
+              "USkFO": "ZdSg-",
+              "vtXVo": "kXHnX"
+            },
+            {
+              "chDbKzNCFz": "cSysM",
+              "yo8DR": "LzSgU",
+              "grweC": "KYKrx"
+            }
+          ]
+        },
+        "7pMCdpnfHkp"
+      ]
+    ],
+    "expected": [
+      "T9w8",
+      "f6dfTbL",
+      "Cb9gfFQcpTt",
+      [
+        {
+          "Mkrwb8PnFJ": [
+            "MTn7FcWF",
+            {
+              " tfgrrRbbHQh": "fEXN1",
+              "USkFO": ["ZdSg-", "54N-e"],
+              "vtXVo": "kXHnX"
+            },
+            {
+              "chDbKzNCFz": "cSysM",
+              "yo8DR": "LzSgU",
+              "grweC": "KYKrx"
+            }
+          ]
+        },
+        "7pMCdpnfHkp"
+      ]
+    ]
   }
 ]
