@@ -9,7 +9,7 @@ export function isEmpty(nodeState) {
 
 export function onCondition(condition, transform, unitValue = undefined) {
   return (nodeState, unit = unitValue) => {
-    if (condition(nodeState)) return transform(nodeState);
+    if (condition(nodeState)) return transform(nodeState, unit);
     return unit;
   };
 }

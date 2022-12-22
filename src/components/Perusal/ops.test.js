@@ -18,7 +18,7 @@ describe(isEmpty.name, () => {
 describe(onString.name, () => {
   it("applies the given transformation to a string nodeState", () => {
     onString(mockTransform)("a");
-    expect(mockTransform).toHaveBeenCalledWith("a");
+    expect(mockTransform).toHaveBeenCalledWith("a", undefined);
   });
 
   it("returns unit value for a non-string nodeState", () => {
@@ -43,7 +43,7 @@ describe(onString.name, () => {
 describe(onArray.name, () => {
   it("applies the given transformation to an array nodeState", () => {
     onArray(mockTransform)(["a"]);
-    expect(mockTransform).toHaveBeenCalledWith(["a"]);
+    expect(mockTransform).toHaveBeenCalledWith(["a"], undefined);
   });
 
   it("returns unit value for a non-array nodeState", () => {
@@ -114,7 +114,7 @@ describe("composing operations", () => {
     it("applies string transformation to string nodeState", () => {
       const result = composition("a", mockUnit);
       expect(result).toBe(stringResult);
-      expect(mockStringTransform).toHaveBeenCalledWith("a");
+      expect(mockStringTransform).toHaveBeenCalledWith("a", mockUnit);
       expect(mockArrayTransform).not.toHaveBeenCalled();
     });
 
@@ -122,7 +122,7 @@ describe("composing operations", () => {
       const result = composition(["a"], mockUnit);
       expect(result).toBe(arrayResult);
       expect(mockStringTransform).not.toHaveBeenCalled();
-      expect(mockArrayTransform).toHaveBeenCalledWith(["a"]);
+      expect(mockArrayTransform).toHaveBeenCalledWith(["a"], mockUnit);
     });
   });
 
@@ -132,7 +132,7 @@ describe("composing operations", () => {
       const result = combine(onString(mockTransform))("a");
       expect(result).toBe("b");
       expect(mockTransform).toHaveBeenCalledTimes(1);
-      expect(mockTransform).toHaveBeenCalledWith("a");
+      expect(mockTransform).toHaveBeenCalledWith("a", undefined);
     });
 
     it("returns unit value if no transform is appropriate", () => {
@@ -153,7 +153,7 @@ describe("composing operations", () => {
       )(["a"]);
       expect(result).toBe(arrayResult);
       expect(mockStringTransform).not.toHaveBeenCalled();
-      expect(mockArrayTransform).toHaveBeenCalledWith(["a"]);
+      expect(mockArrayTransform).toHaveBeenCalledWith(["a"], undefined);
     });
   });
 });

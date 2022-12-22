@@ -199,12 +199,19 @@ const reduce = trampoline(function _reduce(
     case DELETE_STRING:
       return combine(
         onString(() => narrow("")),
-        onArray(() =>
-          recur(
-            state,
-            withPath(...action.path)(DeleteFromArray(action.path.slice(-1)))
-          )
-        ),
+        onArray(() => {
+          if (path !== undefined && path !== null && path !== false) {
+            if (action?.path?.length > 1)
+              return recur(
+                state[path],
+                withPath(...action.path.slice(1))(DeleteString())
+              );
+            return recur(
+              state,
+              withPath(...action.path)(DeleteFromArray(action.path.slice(1)))
+            );
+          }
+        }),
         onObject(() => {
           if (!!path)
             return recur(state, SetKeyValueInObject(path, narrow("")));
@@ -215,7 +222,9 @@ const reduce = trampoline(function _reduce(
       const newString = narrow(String(action.payload));
       return combine(
         onString(() => [state, newString]),
-        onArray(() => void state.splice(path, 1, [state[path], newString]))
+        onArray((_, unit) =>
+          path ? void state.splice(path, 1, [state[path], newString]) : unit
+        )
       )(state, state);
     }
 

@@ -1,0 +1,5 @@
+{
+  "action": { "type": "delete-string" },
+  "state": [[" "]],
+  "expected": [[" "]]
+}

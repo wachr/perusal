@@ -12,6 +12,10 @@ import reduce, {
   withPath,
 } from "./reducer";
 
+beforeAll(() => {
+  // global.structuredClone = jest.fn((obj) => JSON.parse(JSON.stringify(obj)));
+});
+
 describe(reduce.name, () => {
   test.each(["", {}, []])("should narrow empty %p to {}", (empty) => {
     expect(reduce(empty, Narrow())).toStrictEqual({});
@@ -40,6 +44,12 @@ describe(reduce.name, () => {
 
   it("should delete a string into an empty state", () => {
     expect(reduce("foo", DeleteString())).toStrictEqual({});
+  });
+
+  it("should delete a string from an array of strings", () => {
+    const state = [" ", " "];
+    expect(reduce(state, withPath(0)(DeleteString()))).toBe(undefined);
+    expect(state).toStrictEqual([" "]);
   });
 
   it("should delete from an array", () => {
@@ -175,15 +185,31 @@ describe(reduce.name, () => {
     });
   });
 
-  describe.only("reproducing user testing", () => {
-    global.structuredClone = jest.fn((obj) => JSON.parse(JSON.stringify(obj)));
-
+  describe("reproducing user testing", () => {
     it("can delete key from object inside array", () => {
       const startState = [{ a: "foo", b: "bar" }];
       const action = withPath("0")(DeleteFromObject("a"));
       const endState = [{ b: "bar" }];
       expect(reduce(startState, action)).toBeUndefined();
       expect(startState).toEqual(endState);
+    });
+
+    it("addresses nested object delete string defect", async () => {
+      const defect = await import(
+        "../../test/resources/defects/nested-object-delete-string.json"
+      );
+      const result = reduce(defect.state, defect.action);
+      if (result !== undefined) expect(result).toBe(defect.expected);
+      else expect(defect.state).toStrictEqual(defect.expected);
+    });
+
+    it.only("handles nested singleton array string deletion", async () => {
+      const defect = await import(
+        "../../test/resources/defects/nested-singleton-array-delete-string.json"
+      );
+      const result = reduce(defect.state, defect.action);
+      if (result !== undefined) expect(result).toBe(defect.expected);
+      else expect(defect.state).toStrictEqual(defect.expected);
     });
   });
 });
