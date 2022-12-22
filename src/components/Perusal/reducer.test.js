@@ -198,7 +198,8 @@ describe(reduce.name, () => {
 
     it.each(defects)(
       "handles user-reported defect $#: $title",
-      ({ action, state, expected }) => {
+      ({ action, state, expected, run }) => {
+        if (defects.some((defect) => defect.run) && !run) return;
         const result = reduce(state, action);
         if (result !== undefined) expect(result).toBe(expected);
         else expect(state).toStrictEqual(expected);

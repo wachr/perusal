@@ -220,10 +220,18 @@ const reduce = trampoline(function _reduce(
 
     case PROMOTE_STRING_TO_ARRAY: {
       const newString = narrow(String(action.payload));
+      const onPath = (transform) => (_, unit) => path ? transform() : unit;
       return combine(
         onString(() => [state, newString]),
-        onArray((_, unit) =>
-          path ? void state.splice(path, 1, [state[path], newString]) : unit
+        onArray(
+          onPath(() =>
+            recur(state, ReplaceInArray(path, [state[path], newString]))
+          )
+        ),
+        onObject(
+          onPath(() =>
+            recur(state, SetKeyValueInObject(path, [state[path], newString]))
+          )
         )
       )(state, state);
     }
