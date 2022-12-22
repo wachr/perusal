@@ -1,3 +1,5 @@
+import defects from "../../test/resources/defects.json";
+
 import reduce, {
   AddToArray,
   DeleteFromArray,
@@ -194,22 +196,13 @@ describe(reduce.name, () => {
       expect(startState).toEqual(endState);
     });
 
-    it("addresses nested object delete string defect", async () => {
-      const defect = await import(
-        "../../test/resources/defects/nested-object-delete-string.json"
-      );
-      const result = reduce(defect.state, defect.action);
-      if (result !== undefined) expect(result).toBe(defect.expected);
-      else expect(defect.state).toStrictEqual(defect.expected);
-    });
-
-    it.only("handles nested singleton array string deletion", async () => {
-      const defect = await import(
-        "../../test/resources/defects/nested-singleton-array-delete-string.json"
-      );
-      const result = reduce(defect.state, defect.action);
-      if (result !== undefined) expect(result).toBe(defect.expected);
-      else expect(defect.state).toStrictEqual(defect.expected);
-    });
+    it.each(defects)(
+      "handles user-reported defect $#: $title",
+      ({ action, state, expected }) => {
+        const result = reduce(state, action);
+        if (result !== undefined) expect(result).toBe(expected);
+        else expect(state).toStrictEqual(expected);
+      }
+    );
   });
 });
