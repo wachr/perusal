@@ -28,7 +28,7 @@ describe(reduce.name, () => {
   });
 
   describe("should no-op", () => {
-    it.only.each([
+    it.each([
       [AddToArray.name, "foo", AddToArray(0, "bar")],
       [DeleteFromArray.name, "foo", DeleteFromArray(0)],
       [DeleteFromObject.name, "foo", DeleteFromObject("bar")],
@@ -220,7 +220,7 @@ describe(reduce.name, () => {
       ({ action, state, expected, run }) => {
         if (defects.some((defect) => defect.run) && !run) return;
         const result = reduce(state, action);
-        if (result !== undefined) expect(result).toBe(expected);
+        if (result !== undefined) expect(result).toStrictEqual(expected);
         else expect(state).toStrictEqual(expected);
       }
     );

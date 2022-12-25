@@ -165,6 +165,9 @@ const reduce = trampoline(function _reduce(
     action.recursive = true;
     return () => _reduce(state, action);
   }
+  function onPath(transform) {
+    return (_, unit) => (path ? transform() : unit);
+  }
   const path = Array.isArray(action.path) && action.path[0];
   if (followPath(state, action)) {
     action.path.shift();
@@ -181,9 +184,11 @@ const reduce = trampoline(function _reduce(
       const newString = narrow(String(action.payload));
       return combine(
         onEmpty(() => newString),
-        onObject(() => {
-          if (!!path) state[path] = newString;
-        })
+        onObject(
+          onPath(() => {
+            state[path] = newString;
+          })
+        )
       )(state, state);
     }
 
@@ -191,14 +196,16 @@ const reduce = trampoline(function _reduce(
       const newString = narrow(String(action.payload));
       return combine(
         onString(() => newString),
-        onArray((_, unit) => {
-          if (!!path) state.splice(path, 1, newString);
-          else return unit;
-        }),
-        onObject((_, unit) => {
-          if (!!path) state[path] = newString;
-          else return unit;
-        })
+        onArray(
+          onPath(() => {
+            state.splice(path, 1, newString);
+          })
+        ),
+        onObject(
+          onPath(() => {
+            state[path] = newString;
+          })
+        )
       )(state, state);
     }
 
@@ -218,16 +225,13 @@ const reduce = trampoline(function _reduce(
             );
           } else return unit;
         }),
-        onObject((_, unit) => {
-          if (!!path)
-            return recur(state, SetKeyValueInObject(path, narrow("")));
-          else return unit;
-        })
+        onObject(
+          onPath(() => recur(state, SetKeyValueInObject(path, narrow(""))))
+        )
       )(state, state);
 
     case PROMOTE_STRING_TO_ARRAY: {
       const newString = narrow(String(action.payload));
-      const onPath = (transform) => (_, unit) => path ? transform() : unit;
       return combine(
         onString(() => [state, newString]),
         onArray(
@@ -284,20 +288,21 @@ const reduce = trampoline(function _reduce(
     case PROMOTE_STRING_TO_OBJECT: {
       return combine(
         onString(() => ({ [state]: narrow(action.payload) })),
-        onArray((_, unit) => {
-          if (!!path)
+        onArray(
+          onPath(() => {
             state.splice(path, 1, { [state[path]]: narrow(action.payload) });
-          else return unit;
-        }),
-        onObject((_, unit) => {
-          if (!path) return unit;
-          const newKey = path;
-          const newValue = { [state[path]]: narrow(String(action.payload)) };
-          const newAction = withPath(path)(
-            SetKeyValueInObject(newKey, newValue)
-          );
-          return recur(state, newAction);
-        })
+          })
+        ),
+        onObject(
+          onPath(() => {
+            const newKey = path;
+            const newValue = { [state[path]]: narrow(String(action.payload)) };
+            const newAction = withPath(path)(
+              SetKeyValueInObject(newKey, newValue)
+            );
+            return recur(state, newAction);
+          })
+        )
       )(state, state);
     }
 
@@ -333,7 +338,7 @@ const reduce = trampoline(function _reduce(
 
     case SET_KEY_VALUE_IN_OBJECT:
       return combine(
-        onArray(() => recur(state[path], action)),
+        onArray(onPath(() => recur(state[path], action))),
         onObject(() => void (state[action.payload.key] = action.payload.value))
       )(state, state);
 
