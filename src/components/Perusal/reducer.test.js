@@ -27,11 +27,30 @@ describe(reduce.name, () => {
     expect(reduce(["foo"])).toBe("foo");
   });
 
-  it("should no-op if the dispatched action does not match the state's type", () => {
-    expect(reduce(["foo", "bar"], PromoteStringToArray("baz"))).toEqual([
-      "foo",
-      "bar",
-    ]);
+  describe("should no-op", () => {
+    it.only.each([
+      [AddToArray.name, "foo", AddToArray(0, "bar")],
+      [DeleteFromArray.name, "foo", DeleteFromArray(0)],
+      [DeleteFromObject.name, "foo", DeleteFromObject("bar")],
+      [DeleteString.name, ["foo"], DeleteString()],
+      [DemoteObjectToArray.name, "foo", DemoteObjectToArray()],
+      [PromoteEmptyToString.name, "foo", PromoteEmptyToString("bar")],
+      [PromoteStringToArray.name, ["foo"], PromoteStringToArray("bar")],
+      [PromoteStringToObject.name, ["foo"], PromoteStringToObject("bar")],
+      [ReplaceString.name, ["foo"], ReplaceString("bar")],
+    ])(
+      "if the dispatched action %s does not match the state's type",
+      (_, state, action) => expect(reduce(state, action)).toBe(state)
+    );
+
+    it.each([{}, "foo", ["foo", "bar"], { foo: "bar" }])(
+      "if the dispatched action type is not recognized %#",
+      (state) => {
+        expect(
+          reduce(state, { type: "simulated-unrecognized-action-type" })
+        ).toBe(state);
+      }
+    );
   });
 
   it("should coerce to string if promoting an empty to string", () => {

@@ -191,9 +191,13 @@ const reduce = trampoline(function _reduce(
       const newString = narrow(String(action.payload));
       return combine(
         onString(() => newString),
-        onArray(() => void state.splice(path, 1, newString)),
-        onObject(() => {
-          state[path] = newString;
+        onArray((_, unit) => {
+          if (!!path) state.splice(path, 1, newString);
+          else return unit;
+        }),
+        onObject((_, unit) => {
+          if (!!path) state[path] = newString;
+          else return unit;
         })
       )(state, state);
     }
@@ -201,7 +205,7 @@ const reduce = trampoline(function _reduce(
     case DELETE_STRING:
       return combine(
         onString(() => narrow("")),
-        onArray(() => {
+        onArray((_, unit) => {
           if (path !== undefined && path !== null && path !== false) {
             if (action?.path?.length > 1)
               return recur(
@@ -212,11 +216,12 @@ const reduce = trampoline(function _reduce(
               state,
               withPath(...action.path)(DeleteFromArray(action.path.slice(1)))
             );
-          }
+          } else return unit;
         }),
-        onObject(() => {
+        onObject((_, unit) => {
           if (!!path)
             return recur(state, SetKeyValueInObject(path, narrow("")));
+          else return unit;
         })
       )(state, state);
 
@@ -239,7 +244,7 @@ const reduce = trampoline(function _reduce(
     }
 
     case ADD_TO_ARRAY:
-      onArray(
+      return onArray(
         () =>
           void state.splice(
             action.payload.index,
@@ -247,8 +252,7 @@ const reduce = trampoline(function _reduce(
             narrow(action.payload.element)
           ),
         state
-      )(state);
-      return;
+      )(state, state);
 
     case DELETE_FROM_ARRAY:
       return onArray(() => {
@@ -280,10 +284,13 @@ const reduce = trampoline(function _reduce(
     case PROMOTE_STRING_TO_OBJECT: {
       return combine(
         onString(() => ({ [state]: narrow(action.payload) })),
-        onArray(() => {
-          state.splice(path, 1, { [state[path]]: narrow(action.payload) });
+        onArray((_, unit) => {
+          if (!!path)
+            state.splice(path, 1, { [state[path]]: narrow(action.payload) });
+          else return unit;
         }),
-        onObject(() => {
+        onObject((_, unit) => {
+          if (!path) return unit;
           const newKey = path;
           const newValue = { [state[path]]: narrow(String(action.payload)) };
           const newAction = withPath(path)(

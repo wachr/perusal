@@ -140,7 +140,7 @@ describe(reduce.name, () => {
         (state, str) => {
           const initialState = JSON.parse(JSON.stringify(state));
           const nextState = reduce(state, stringActionCreator(str));
-          expect(nextState).toBeUndefined();
+          expect(nextState).toBe(state);
           expect(state).toStrictEqual(initialState);
         }
       )
