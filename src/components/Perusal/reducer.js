@@ -146,10 +146,12 @@ const reduce = trampoline(function _reduce(
   action = { type: NARROW, payload: undefined, path: [], recursive: false }
 ) {
   if (!!global.structuredClone)
-    console.log({
-      action: structuredClone(action),
-      state: JSON.parse(JSON.stringify(state)),
-    });
+    if (action?.recursive) console.log("recursive reduction");
+    else
+      console.log({
+        action: structuredClone(action),
+        state: JSON.parse(JSON.stringify(state)),
+      });
   function followPath(state, action) {
     return (
       Array.isArray(action.path) &&
