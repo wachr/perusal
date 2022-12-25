@@ -154,27 +154,13 @@ const reduce = trampoline(function _reduce(
         action: structuredClone(action),
         state: JSON.parse(JSON.stringify(state)),
       });
-  function followPath(state, action) {
-    return (
-      Array.isArray(action.path) &&
-      action.path.length > 1 &&
-      (!Array.isArray(state) ||
-        state.length > 2 ||
-        ![DELETE_STRING].includes(action.type))
-    );
-  }
-  function recur(state, action) {
-    action.recursive = true;
-    return () => _reduce(state, action);
-  }
-  function onPath(transform) {
-    return (_, unit) => (path ? transform() : unit);
-  }
+
   const path = Array.isArray(action.path) && action.path[0];
   if (followPath(state, action)) {
     action.path.shift();
     return recur(state[path], action);
   }
+
   switch (action.type) {
     case NARROW:
       return narrow(state);
@@ -343,6 +329,25 @@ const reduce = trampoline(function _reduce(
 
     default:
       return action.payload || state;
+  }
+
+  function recur(state, action) {
+    action.recursive = true;
+    return () => _reduce(state, action);
+  }
+
+  function followPath(state, action) {
+    return (
+      Array.isArray(action.path) &&
+      action.path.length > 1 &&
+      (!Array.isArray(state) ||
+        state.length > 2 ||
+        ![DELETE_STRING].includes(action.type))
+    );
+  }
+
+  function onPath(transform) {
+    return (_, unit) => (path ? transform() : unit);
   }
 });
 
