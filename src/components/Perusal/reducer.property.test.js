@@ -88,29 +88,58 @@ describe(reduce.name, () => {
       );
     });
 
+    it("on non-strings missing a path", () => {
+      assert(
+        property(
+          fc.oneof(
+            nonEmptyArray(nonEmptyString()),
+            nonEmptyObject(nonEmptyString())
+          ),
+          nonEmptyString(),
+          (state, str) => {
+            const nextState = reduce(state, PromoteStringToArray(str));
+            expect(nextState).toStrictEqual(state);
+          }
+        )
+      );
+    });
+
+    function assertNestedArray({ state, path }, str) {
+      const nextState = reduce(
+        state,
+        withPath(path)(PromoteStringToArray(str))
+      );
+      expect(nextState).toBeUndefined();
+      expect(state[path]).toHaveLength(2);
+      expect(state[path][1]).toBe(str);
+    }
+
     it("on arrays of strings", () => {
       assert(
         property(
           nonEmptyArray(nonEmptyString()).chain((arr) =>
             fc.record({
               state: fc.constant(arr),
-              path: fc.option(fc.nat({ max: arr.length - 1 }).map(String)),
+              path: fc.nat({ max: arr.length - 1 }).map(String),
             })
           ),
           nonEmptyString(),
-          ({ state, path }, str) => {
-            if (!path) {
-              const nextState = reduce(state, PromoteStringToArray(str));
-              expect(nextState).toStrictEqual(state);
-              return;
-            }
-            const nextState = reduce(
-              state,
-              withPath(path)(PromoteStringToArray(str))
-            );
-            expect(nextState).toBeUndefined();
-            expect(state[path]).toHaveLength(2);
-          }
+          assertNestedArray
+        )
+      );
+    });
+
+    it("on objects of strings", () => {
+      assert(
+        property(
+          nonEmptyObject(nonEmptyString()).chain((obj) =>
+            fc.record({
+              state: fc.constant(obj),
+              path: fc.oneof(...Object.keys(obj).map(fc.constant)),
+            })
+          ),
+          nonEmptyString(),
+          assertNestedArray
         )
       );
     });
