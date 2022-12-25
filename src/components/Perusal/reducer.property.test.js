@@ -33,15 +33,19 @@ describe(reduce.name, () => {
 
     it("on arrays of strings", () => {
       assert(
-        property(nonEmptyArray(nonEmptyString()), fc.nat(), (arr, index) => {
-          const nextState = reduce(arr, withPath(index)(DeleteString()));
-          expect(nextState || []).not.toContain(arr[index]);
-          arr.length === 1
-            ? expect(isEmpty(nextState)).toBe(true)
-            : expect(nextState === undefined ? arr : nextState).toEqual(
-                expect.arrayContaining(arr)
-              );
-        })
+        property(
+          nonEmptyArray(nonEmptyString()),
+          fc.nat().map(String),
+          (arr, index) => {
+            const nextState = reduce(arr, withPath(index)(DeleteString()));
+            expect(nextState || []).not.toContain(arr[index]);
+            arr.length === 1
+              ? expect(isEmpty(nextState)).toBe(true)
+              : expect(nextState === undefined ? arr : nextState).toEqual(
+                  expect.arrayContaining(arr)
+                );
+          }
+        )
       );
     });
 

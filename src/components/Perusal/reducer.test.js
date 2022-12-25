@@ -69,7 +69,7 @@ describe(reduce.name, () => {
 
   it("should delete a string from an array of strings", () => {
     const state = [" ", " "];
-    expect(reduce(state, withPath(0)(DeleteString()))).toBe(undefined);
+    expect(reduce(state, withPath("0")(DeleteString()))).toBe(undefined);
     expect(state).toStrictEqual([" "]);
   });
 

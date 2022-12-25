@@ -133,6 +133,8 @@ export function SetKeyValueInObject(key, value) {
 }
 
 export function withPath(...pathParts) {
+  if (pathParts.some((e) => typeof e !== "string"))
+    throw new Error("withPath requires arguments to be strings");
   return (action) => {
     !!action.path
       ? action.path.unshift(...pathParts)
@@ -196,24 +198,16 @@ const reduce = trampoline(function _reduce(
       const newString = narrow(String(action.payload));
       return combine(
         onString(() => newString),
-        onArray(
-          onPath(() => {
-            state.splice(path, 1, newString);
-          })
-        ),
-        onObject(
-          onPath(() => {
-            state[path] = newString;
-          })
-        )
+        onArray(onPath(() => void state.splice(path, 1, newString))),
+        onObject(onPath(() => void (state[path] = newString)))
       )(state, state);
     }
 
     case DELETE_STRING:
       return combine(
         onString(() => narrow("")),
-        onArray((_, unit) => {
-          if (path !== undefined && path !== null && path !== false) {
+        onArray(
+          onPath(() => {
             if (action?.path?.length > 1)
               return recur(
                 state[path],
@@ -223,8 +217,8 @@ const reduce = trampoline(function _reduce(
               state,
               withPath(...action.path)(DeleteFromArray(action.path.slice(1)))
             );
-          } else return unit;
-        }),
+          })
+        ),
         onObject(
           onPath(() => recur(state, SetKeyValueInObject(path, narrow(""))))
         )
@@ -289,19 +283,24 @@ const reduce = trampoline(function _reduce(
       return combine(
         onString(() => ({ [state]: narrow(action.payload) })),
         onArray(
-          onPath(() => {
-            state.splice(path, 1, { [state[path]]: narrow(action.payload) });
-          })
+          onPath(
+            () =>
+              void state.splice(path, 1, {
+                [state[path]]: narrow(action.payload),
+              })
+          )
         ),
         onObject(
-          onPath(() => {
-            const newKey = path;
-            const newValue = { [state[path]]: narrow(String(action.payload)) };
-            const newAction = withPath(path)(
-              SetKeyValueInObject(newKey, newValue)
-            );
-            return recur(state, newAction);
-          })
+          onPath(() =>
+            recur(
+              state,
+              withPath(path)(
+                SetKeyValueInObject(path, {
+                  [state[path]]: narrow(String(action.payload)),
+                })
+              )
+            )
+          )
         )
       )(state, state);
     }
