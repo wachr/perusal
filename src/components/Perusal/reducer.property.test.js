@@ -67,6 +67,20 @@ describe(reduce.name, () => {
     });
   });
 
+  function expectNestedToStrictEqual(actionCreator, valueSupplier) {
+    return ({ state, path }, actionPayload) => {
+      const initialValue = state[path];
+      const nextState = reduce(
+        state,
+        withPath(path)(actionCreator(actionPayload))
+      );
+      expect(nextState).toBeUndefined();
+      expect(state[path]).toStrictEqual(
+        valueSupplier(initialValue, actionPayload)
+      );
+    };
+  }
+
   describe(PromoteStringToArray.name, () => {
     it("on strings", () => {
       assert(
@@ -76,16 +90,6 @@ describe(reduce.name, () => {
         })
       );
     });
-
-    function assertNestedArray({ state, path }, str) {
-      const nextState = reduce(
-        state,
-        withPath(path)(PromoteStringToArray(str))
-      );
-      expect(nextState).toBeUndefined();
-      expect(state[path]).toHaveLength(2);
-      expect(state[path][1]).toBe(str);
-    }
 
     it("on arrays of strings", () => {
       assert(
@@ -97,7 +101,10 @@ describe(reduce.name, () => {
             })
           ),
           nonEmptyString(),
-          assertNestedArray
+          expectNestedToStrictEqual(
+            PromoteStringToArray,
+            (initial, payload) => [initial, payload]
+          )
         )
       );
     });
@@ -112,7 +119,10 @@ describe(reduce.name, () => {
             })
           ),
           nonEmptyString(),
-          assertNestedArray
+          expectNestedToStrictEqual(
+            PromoteStringToArray,
+            (initial, payload) => [initial, payload]
+          )
         )
       );
     });
@@ -128,8 +138,41 @@ describe(reduce.name, () => {
       );
     });
 
-    it.todo("on arrays of strings");
-    it.todo("on objects of strings");
+    it("on arrays of strings", () => {
+      assert(
+        property(
+          nonEmptyArray(nonEmptyString()).chain((arr) =>
+            fc.record({
+              state: fc.constant(arr),
+              path: fc.nat({ max: arr.length - 1 }).map(String),
+            })
+          ),
+          nonEmptyString(),
+          expectNestedToStrictEqual(
+            PromoteStringToObject,
+            (initial, payload) => ({ [initial]: payload })
+          )
+        )
+      );
+    });
+
+    it("on objects of strings", () => {
+      assert(
+        property(
+          nonEmptyObject(fc.string()).chain((obj) =>
+            fc.record({
+              state: fc.constant(obj),
+              path: fc.oneof(...Object.keys(obj).map(fc.constant)),
+            })
+          ),
+          nonEmptyString(),
+          expectNestedToStrictEqual(
+            PromoteStringToObject,
+            (initial, payload) => ({ [initial]: payload })
+          )
+        )
+      );
+    });
   });
 
   it.each(
