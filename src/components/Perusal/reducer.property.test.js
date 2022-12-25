@@ -5,6 +5,7 @@ import { isEmpty } from "./ops";
 import reduce, {
   DeleteString,
   PromoteStringToArray,
+  PromoteStringToObject,
   withPath,
 } from "./reducer";
 
@@ -26,22 +27,6 @@ describe(reduce.name, () => {
       assert(
         property(nonEmptyString(), (str) => {
           expect(reduce(str, DeleteString())).toStrictEqual({});
-        })
-      );
-    });
-
-    it("on arrays without a path", () => {
-      assert(
-        property(nonEmptyArray(nonEmptyString()), (arr) => {
-          expect(reduce(arr, DeleteString())).toBeUndefined();
-        })
-      );
-    });
-
-    it("on objects without a path", () => {
-      assert(
-        property(nonEmptyObject(fc.string()), (obj) => {
-          expect(reduce(obj, DeleteString())).toBeUndefined();
         })
       );
     });
@@ -88,22 +73,6 @@ describe(reduce.name, () => {
       );
     });
 
-    it("on non-strings missing a path", () => {
-      assert(
-        property(
-          fc.oneof(
-            nonEmptyArray(nonEmptyString()),
-            nonEmptyObject(nonEmptyString())
-          ),
-          nonEmptyString(),
-          (state, str) => {
-            const nextState = reduce(state, PromoteStringToArray(str));
-            expect(nextState).toStrictEqual(state);
-          }
-        )
-      );
-    });
-
     function assertNestedArray({ state, path }, str) {
       const nextState = reduce(
         state,
@@ -143,5 +112,38 @@ describe(reduce.name, () => {
         )
       );
     });
+  });
+
+  describe(PromoteStringToObject.name, () => {
+    it("on strings", () => {
+      assert(
+        property(nonEmptyString(), nonEmptyString(), (state, str) => {
+          const nextState = reduce(state, PromoteStringToObject(str));
+          expect(nextState).toStrictEqual({ [state]: str });
+        })
+      );
+    });
+
+    it.todo("on arrays of strings");
+    it.todo("on objects of strings");
+  });
+
+  it.each(
+    [DeleteString, PromoteStringToArray, PromoteStringToObject].map(
+      (actionCreator) => [actionCreator.name, actionCreator]
+    )
+  )("for %s on non-strings without a path", (_, stringActionCreator) => {
+    assert(
+      property(
+        fc.oneof(nonEmptyArray(nonEmptyString()), nonEmptyObject(fc.string())),
+        nonEmptyString(),
+        (state, str) => {
+          const initialState = JSON.parse(JSON.stringify(state));
+          const nextState = reduce(state, stringActionCreator(str));
+          expect(nextState).toBeUndefined();
+          expect(state).toStrictEqual(initialState);
+        }
+      )
+    );
   });
 });
