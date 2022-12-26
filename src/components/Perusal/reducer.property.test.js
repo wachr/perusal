@@ -3,6 +3,7 @@ import * as fc from "fast-check";
 
 import { isEmpty } from "./ops";
 import reduce, {
+  AddToArray,
   DeleteString,
   PromoteEmptyToString,
   PromoteStringToArray,
@@ -24,6 +25,13 @@ function nonEmptyObject(arb) {
 }
 
 describe(reduce.name, () => {
+  function expectNoOpFor(state, action) {
+    const initialState = JSON.parse(JSON.stringify(state));
+    const nextState = reduce(state, action);
+    expect(nextState).toBe(state);
+    expect(state).toStrictEqual(initialState);
+  }
+
   describe(PromoteEmptyToString.name, () => {
     it("on empties", () => {
       assert(
@@ -47,12 +55,8 @@ describe(reduce.name, () => {
             nonEmptyObject(fc.string())
           ),
           nonEmptyString(),
-          (state, payload) => {
-            const initialState = JSON.parse(JSON.stringify(state));
-            const nextState = reduce(state, PromoteEmptyToString(payload));
-            expect(nextState).toBe(state);
-            expect(state).toStrictEqual(initialState);
-          }
+          (state, payload) =>
+            expectNoOpFor(state, PromoteEmptyToString(payload))
         )
       );
     });
@@ -264,13 +268,24 @@ describe(reduce.name, () => {
       property(
         fc.oneof(nonEmptyArray(nonEmptyString()), nonEmptyObject(fc.string())),
         nonEmptyString(),
-        (state, str) => {
-          const initialState = JSON.parse(JSON.stringify(state));
-          const nextState = reduce(state, stringActionCreator(str));
-          expect(nextState).toBe(state);
-          expect(state).toStrictEqual(initialState);
-        }
+        (state, str) => expectNoOpFor(state, stringActionCreator(str))
       )
     );
+  });
+
+  describe(AddToArray.name, () => {
+    it("on non-arrays", () => {
+      assert(
+        property(
+          fc.oneof(fc.string(), nonEmptyObject(fc.string())),
+          fc.nat(),
+          nonEmptyString(),
+          (state, index, payload) =>
+            expectNoOpFor(state, AddToArray(index, payload))
+        )
+      );
+    });
+
+    it.todo("on arrays");
   });
 });
