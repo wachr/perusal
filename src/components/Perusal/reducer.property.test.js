@@ -24,14 +24,21 @@ function nonEmptyObject(arb) {
   return fc.dictionary(nonEmptyString(), arb, { minKeys: 1 });
 }
 
-describe(reduce.name, () => {
-  function expectNoOpFor(state, action) {
-    const initialState = JSON.parse(JSON.stringify(state));
-    const nextState = reduce(state, action);
-    expect(nextState).toBe(state);
-    expect(state).toStrictEqual(initialState);
-  }
+function withArrayPath(arr) {
+  return fc.record({
+    state: fc.constant(arr),
+    path: fc.nat({ max: arr.length - 1 }).map(String),
+  });
+}
 
+function expectNoOpFor(state, action) {
+  const initialState = JSON.parse(JSON.stringify(state));
+  const nextState = reduce(state, action);
+  expect(nextState).toBe(state);
+  expect(state).toStrictEqual(initialState);
+}
+
+describe(reduce.name, () => {
   describe(PromoteEmptyToString.name, () => {
     it("on empties", () => {
       assert(
@@ -134,12 +141,7 @@ describe(reduce.name, () => {
     it("on arrays of strings", () => {
       assert(
         property(
-          nonEmptyArray(nonEmptyString()).chain((arr) =>
-            fc.record({
-              state: fc.constant(arr),
-              path: fc.nat({ max: arr.length - 1 }).map(String),
-            })
-          ),
+          nonEmptyArray(nonEmptyString()).chain(withArrayPath),
           nonEmptyString(),
           expectNestedToStrictEqual(
             PromoteStringToArray,
@@ -181,12 +183,7 @@ describe(reduce.name, () => {
     it("on arrays of strings", () => {
       assert(
         property(
-          nonEmptyArray(nonEmptyString()).chain((arr) =>
-            fc.record({
-              state: fc.constant(arr),
-              path: fc.nat({ max: arr.length - 1 }).map(String),
-            })
-          ),
+          nonEmptyArray(nonEmptyString()).chain(withArrayPath),
           nonEmptyString(),
           expectNestedToStrictEqual(
             PromoteStringToObject,
@@ -228,12 +225,7 @@ describe(reduce.name, () => {
     it("on arrays of strings", () => {
       assert(
         property(
-          nonEmptyArray(nonEmptyString()).chain((arr) =>
-            fc.record({
-              state: fc.constant(arr),
-              path: fc.nat({ max: arr.length - 1 }).map(String),
-            })
-          ),
+          nonEmptyArray(nonEmptyString()).chain(withArrayPath),
           nonEmptyString(),
           expectNestedToStrictEqual(ReplaceString, (_, payload) => payload)
         )
@@ -286,6 +278,20 @@ describe(reduce.name, () => {
       );
     });
 
-    it.todo("on arrays");
+    it("on arrays", () => {
+      assert(
+        property(
+          nonEmptyArray(nonEmptyString()).chain(withArrayPath),
+          nonEmptyString(),
+          ({ state, path: index }, payload) => {
+            const initialLength = state.length;
+            const nextState = reduce(state, AddToArray(index, payload));
+            expect(nextState).toBeUndefined();
+            expect(state[index]).toBe(payload);
+            expect(state.length).toBe(initialLength + 1);
+          }
+        )
+      );
+    });
   });
 });
