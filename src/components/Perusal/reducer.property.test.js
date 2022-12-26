@@ -4,8 +4,10 @@ import * as fc from "fast-check";
 import { isEmpty } from "./ops";
 import reduce, {
   DeleteString,
+  PromoteEmptyToString,
   PromoteStringToArray,
   PromoteStringToObject,
+  ReplaceString,
   withPath,
 } from "./reducer";
 
@@ -22,6 +24,40 @@ function nonEmptyObject(arb) {
 }
 
 describe(reduce.name, () => {
+  describe(PromoteEmptyToString.name, () => {
+    it("on empties", () => {
+      assert(
+        property(
+          fc.constantFrom({}, "", null, undefined),
+          nonEmptyString(),
+          (state, payload) => {
+            const nextState = reduce(state, PromoteEmptyToString(payload));
+            expect(nextState).toBe(payload);
+          }
+        )
+      );
+    });
+
+    it("on non-empties", () => {
+      assert(
+        property(
+          fc.oneof(
+            nonEmptyString(),
+            nonEmptyArray(nonEmptyString()),
+            nonEmptyObject(fc.string())
+          ),
+          nonEmptyString(),
+          (state, payload) => {
+            const initialState = JSON.parse(JSON.stringify(state));
+            const nextState = reduce(state, PromoteEmptyToString(payload));
+            expect(nextState).toBe(state);
+            expect(state).toStrictEqual(initialState);
+          }
+        )
+      );
+    });
+  });
+
   describe(DeleteString.name, () => {
     it("on strings", () => {
       assert(
@@ -175,10 +211,54 @@ describe(reduce.name, () => {
     });
   });
 
+  describe(ReplaceString.name, () => {
+    it("on strings", () => {
+      assert(
+        property(nonEmptyString(), nonEmptyString(), (state, payload) => {
+          const nextState = reduce(state, ReplaceString(payload));
+          expect(nextState).toBe(payload);
+        })
+      );
+    });
+
+    it("on arrays of strings", () => {
+      assert(
+        property(
+          nonEmptyArray(nonEmptyString()).chain((arr) =>
+            fc.record({
+              state: fc.constant(arr),
+              path: fc.nat({ max: arr.length - 1 }).map(String),
+            })
+          ),
+          nonEmptyString(),
+          expectNestedToStrictEqual(ReplaceString, (_, payload) => payload)
+        )
+      );
+    });
+
+    it("on objects of strings", () => {
+      assert(
+        property(
+          nonEmptyObject(nonEmptyString()).chain((obj) =>
+            fc.record({
+              state: fc.constant(obj),
+              path: fc.oneof(...Object.keys(obj).map(fc.constant)),
+            })
+          ),
+          nonEmptyString(),
+          expectNestedToStrictEqual(ReplaceString, (_, payload) => payload)
+        )
+      );
+    });
+  });
+
   it.each(
-    [DeleteString, PromoteStringToArray, PromoteStringToObject].map(
-      (actionCreator) => [actionCreator.name, actionCreator]
-    )
+    [
+      DeleteString,
+      PromoteStringToArray,
+      PromoteStringToObject,
+      ReplaceString,
+    ].map((actionCreator) => [actionCreator.name, actionCreator])
   )("for %s on non-strings without a path", (_, stringActionCreator) => {
     assert(
       property(
