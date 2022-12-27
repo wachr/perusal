@@ -152,7 +152,7 @@ const reduce = trampoline(function _reduce(
     else
       console.log({
         action: structuredClone(action),
-        state: JSON.parse(JSON.stringify(state)),
+        state: state && JSON.parse(JSON.stringify(state)),
       });
 
   const path = Array.isArray(action.path) && action.path[0];
@@ -228,14 +228,22 @@ const reduce = trampoline(function _reduce(
     }
 
     case ADD_TO_ARRAY:
-      return onArray(
-        () =>
-          void state.splice(
-            action.payload.index,
-            0,
-            narrow(action.payload.element)
-          ),
-        state
+      return combine(
+        onArray((_, unit) => {
+          if (path) {
+            if (typeof state[path] !== "object") return unit;
+            action.path.shift();
+            return recur(state[path], action);
+          }
+          state.splice(action.payload.index, 0, narrow(action.payload.element));
+        }),
+        onObject(
+          onPath((_, unit) => {
+            if (typeof state[path] !== "object") return unit;
+            action.path.shift();
+            return recur(state[path], action);
+          })
+        )
       )(state, state);
 
     case DELETE_FROM_ARRAY:
@@ -347,7 +355,7 @@ const reduce = trampoline(function _reduce(
   }
 
   function onPath(transform) {
-    return (_, unit) => (path ? transform() : unit);
+    return (a, unit) => (path ? transform(a, unit) : unit);
   }
 });
 

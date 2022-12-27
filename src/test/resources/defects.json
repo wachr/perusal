@@ -81,5 +81,15 @@
         "7pMCdpnfHkp"
       ]
     ]
+  },
+  {
+    "title": "add to nested array",
+    "state": { "foo": ["bar", "bing"] },
+    "action": {
+      "path": ["foo"],
+      "type": "add-to-array",
+      "payload": { "index": 0, "element": "baz" }
+    },
+    "expected": { "foo": ["baz", "bar", "bing"] }
   }
 ]

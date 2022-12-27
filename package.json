@@ -15,7 +15,7 @@
     "serve": "sirv build --port 8080 --cors --single",
     "serve:gh": "sirv gh-local --port 8080 --cors --single",
     "test": "jest",
-    "test:debug": "node --inspect-brk=0.0.0.0 ./node_modules/.bin/jest --runInBand",
+    "test:debug": "node --inspect=0.0.0.0 ./node_modules/.bin/jest --runInBand",
     "watch": "onchange --initial . --exclude-path .gitignore -- prettier --write . && eslint . --fix; echo {{event}} to {{file}}"
   },
   "eslintConfig": {

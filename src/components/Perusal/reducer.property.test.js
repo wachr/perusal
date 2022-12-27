@@ -4,6 +4,7 @@ import * as fc from "fast-check";
 import { isEmpty } from "./ops";
 import reduce, {
   AddToArray,
+  DeleteFromArray,
   DeleteString,
   PromoteEmptyToString,
   PromoteStringToArray,
@@ -11,6 +12,10 @@ import reduce, {
   ReplaceString,
   withPath,
 } from "./reducer";
+
+function empties() {
+  return fc.constantFrom({}, [], "", null, undefined);
+}
 
 function nonEmptyString() {
   return fc.string({ minLength: 1 });
@@ -31,25 +36,32 @@ function withArrayPath(arr) {
   });
 }
 
+function withObjectPath(obj) {
+  return fc.record({
+    state: fc.constant(obj),
+    path: fc.constantFrom(...Object.keys(obj)),
+  });
+}
+
 function expectNoOpFor(state, action) {
-  const initialState = JSON.parse(JSON.stringify(state));
+  const initialState = state && JSON.parse(JSON.stringify(state));
   const nextState = reduce(state, action);
   expect(nextState).toBe(state);
   expect(state).toStrictEqual(initialState);
 }
 
 describe(reduce.name, () => {
+  beforeAll(() => {
+    // global.structuredClone = jest.fn((obj) => JSON.parse(JSON.stringify(obj)));
+  });
+
   describe(PromoteEmptyToString.name, () => {
     it("on empties", () => {
       assert(
-        property(
-          fc.constantFrom({}, "", null, undefined),
-          nonEmptyString(),
-          (state, payload) => {
-            const nextState = reduce(state, PromoteEmptyToString(payload));
-            expect(nextState).toBe(payload);
-          }
-        )
+        property(empties(), nonEmptyString(), (state, payload) => {
+          const nextState = reduce(state, PromoteEmptyToString(payload));
+          expect(nextState).toBe(payload);
+        })
       );
     });
 
@@ -97,19 +109,18 @@ describe(reduce.name, () => {
     });
 
     it("on objects of strings", () => {
-      const arbPerusal = (arb) =>
-        nonEmptyObject(arb).chain((arbObj) =>
-          fc.record({
-            state: fc.constant(arbObj),
-            path: fc.oneof(...Object.keys(arbObj).map(fc.constant)),
-          })
-        );
       assert(
-        property(arbPerusal(nonEmptyString()), ({ state, path }) => {
-          expect(state[path]).toBeDefined();
-          expect(reduce(state, withPath(path)(DeleteString()))).toBeUndefined();
-          expect(isEmpty(state[path])).toBe(true);
-        })
+        property(
+          nonEmptyObject(nonEmptyString()).chain(withObjectPath),
+          ({ state, path }) => {
+            expect(state[path]).toBeDefined();
+            expect(
+              reduce(state, withPath(path)(DeleteString()))
+            ).toBeUndefined();
+            expect(isEmpty(state[path])).toBe(true);
+            expect(isEmpty(state)).toBe(false);
+          }
+        )
       );
     });
   });
@@ -154,12 +165,7 @@ describe(reduce.name, () => {
     it("on objects of strings", () => {
       assert(
         property(
-          nonEmptyObject(nonEmptyString()).chain((obj) =>
-            fc.record({
-              state: fc.constant(obj),
-              path: fc.oneof(...Object.keys(obj).map(fc.constant)),
-            })
-          ),
+          nonEmptyObject(nonEmptyString()).chain(withObjectPath),
           nonEmptyString(),
           expectNestedToStrictEqual(
             PromoteStringToArray,
@@ -196,12 +202,7 @@ describe(reduce.name, () => {
     it("on objects of strings", () => {
       assert(
         property(
-          nonEmptyObject(fc.string()).chain((obj) =>
-            fc.record({
-              state: fc.constant(obj),
-              path: fc.oneof(...Object.keys(obj).map(fc.constant)),
-            })
-          ),
+          nonEmptyObject(fc.string()).chain(withObjectPath),
           nonEmptyString(),
           expectNestedToStrictEqual(
             PromoteStringToObject,
@@ -235,12 +236,7 @@ describe(reduce.name, () => {
     it("on objects of strings", () => {
       assert(
         property(
-          nonEmptyObject(nonEmptyString()).chain((obj) =>
-            fc.record({
-              state: fc.constant(obj),
-              path: fc.oneof(...Object.keys(obj).map(fc.constant)),
-            })
-          ),
+          nonEmptyObject(nonEmptyString()).chain(withObjectPath),
           nonEmptyString(),
           expectNestedToStrictEqual(ReplaceString, (_, payload) => payload)
         )
@@ -265,33 +261,190 @@ describe(reduce.name, () => {
     );
   });
 
-  describe(AddToArray.name, () => {
-    it("on non-arrays", () => {
+  describe("array actions", () => {
+    it.each(
+      [AddToArray, DeleteFromArray].map((actionCreator) => [
+        actionCreator.name,
+        actionCreator,
+      ])
+    )("for %s on non-arrays without a path", (_, actionCreator) => {
       assert(
         property(
-          fc.oneof(fc.string(), nonEmptyObject(fc.string())),
+          fc.oneof(empties(), nonEmptyString(), nonEmptyObject(fc.string())),
           fc.nat(),
           nonEmptyString(),
           (state, index, payload) =>
-            expectNoOpFor(state, AddToArray(index, payload))
+            expectNoOpFor(state, actionCreator(index, payload))
         )
       );
     });
 
-    it("on arrays", () => {
-      assert(
-        property(
-          nonEmptyArray(nonEmptyString()).chain(withArrayPath),
-          nonEmptyString(),
-          ({ state, path: index }, payload) => {
-            const initialLength = state.length;
-            const nextState = reduce(state, AddToArray(index, payload));
-            expect(nextState).toBeUndefined();
-            expect(state[index]).toBe(payload);
-            expect(state.length).toBe(initialLength + 1);
-          }
-        )
-      );
+    describe(AddToArray.name, () => {
+      it("on strings", () => {
+        assert(
+          property(
+            fc.string(),
+            fc.nat(),
+            nonEmptyString(),
+            (state, index, payload) =>
+              expectNoOpFor(state, AddToArray(index, payload))
+          )
+        );
+      });
+
+      it("on arrays", () => {
+        assert(
+          property(
+            nonEmptyArray(nonEmptyString()).chain(withArrayPath),
+            nonEmptyString(),
+            ({ state, path: index }, payload) => {
+              const initialLength = state.length;
+              const nextState = reduce(state, AddToArray(index, payload));
+              expect(nextState).toBeUndefined();
+              expect(state[index]).toBe(payload);
+              expect(state.length).toBe(initialLength + 1);
+            }
+          )
+        );
+      });
+
+      it("on objects of strings with path", () => {
+        assert(
+          property(
+            nonEmptyObject(fc.string()).chain(withObjectPath),
+            fc.nat(),
+            nonEmptyString(),
+            ({ state, path }, index, payload) =>
+              expectNoOpFor(state, withPath(path)(AddToArray(index, payload)))
+          )
+        );
+      });
+
+      it("on nested arrays inside objects with path", () => {
+        assert(
+          property(
+            nonEmptyObject(nonEmptyString())
+              .chain(withObjectPath)
+              .chain(({ state: outer, path }) =>
+                nonEmptyArray(nonEmptyString()).chain((nested) =>
+                  fc.record({
+                    state: fc.constant({
+                      ...outer,
+                      [path]: Array.from(nested),
+                    }),
+                    path: fc.constant(path),
+                    index: fc.nat({ max: nested.length }),
+                  })
+                )
+              ),
+            nonEmptyString(),
+            ({ state, path, index }, payload) => {
+              expect(Array.isArray(state[path])).toBe(true);
+              const initialLength = state[path].length;
+              const nextState = reduce(
+                state,
+                withPath(path)(AddToArray(index, payload))
+              );
+              expect(nextState).toBeUndefined();
+              expect(Array.isArray(state[path])).toBe(true);
+              expect(state[path].length).toBe(initialLength + 1);
+              expect(state[path]).toContain(payload);
+            }
+          )
+        );
+      });
+
+      it("on nested arrays inside arrays with path", () => {
+        assert(
+          property(
+            nonEmptyArray(nonEmptyString())
+              .chain(withArrayPath)
+              .chain(({ state, path }) =>
+                nonEmptyArray(nonEmptyString()).chain((nested) => {
+                  const newState = Array.from(state);
+                  newState[path] = Array.from(nested);
+                  return fc.constant({ state: newState, path });
+                })
+              )
+              .chain(({ state, path }) =>
+                fc.record({
+                  state: fc.constant(state),
+                  path: fc.constant(path),
+                  index: fc.nat({ max: state[path].length }),
+                })
+              ),
+            fc.lorem().filter((str) => !str.match(/\s/)),
+            ({ state, path, index }, payload) => {
+              expect(Array.isArray(state[path])).toBe(true);
+              const initialLength = state[path].length;
+              const nextState = reduce(
+                state,
+                withPath(path)(AddToArray(index, payload))
+              );
+              expect(nextState).toBeUndefined();
+              expect(Array.isArray(state[path])).toBe(true);
+              expect(state[path].length).toBe(initialLength + 1);
+              expect(state[path]).toContain(payload);
+            }
+          )
+        );
+      });
+    });
+
+    describe(DeleteFromArray.name, () => {
+      it("on arrays of more than two elements", () => {
+        assert(
+          property(
+            nonEmptyArray(nonEmptyString())
+              .filter((arr) => arr.length > 2)
+              .chain(withArrayPath),
+            ({ state, path: index }) => {
+              const initialLength = state.length;
+              const initialValue = state[index];
+              const nextState = reduce(state, DeleteFromArray(index));
+              expect(nextState).toBeUndefined();
+              expect(state.length).toBe(initialLength - 1);
+              expect(state).not.toContain(initialValue);
+            }
+          )
+        );
+      });
+
+      it("on arrays of two elements", () => {
+        assert(
+          property(
+            fc.tuple(nonEmptyString(), nonEmptyString()),
+            fc.constantFrom(0, 1).map(String),
+            (state, index) => {
+              const expected = state[index === "0" ? 1 : 0];
+              const nextState = reduce(state, DeleteFromArray(index));
+              expect(nextState).toStrictEqual(expected);
+            }
+          )
+        );
+      });
+
+      it("on singleton arrays", () => {
+        assert(
+          property(fc.tuple(nonEmptyString()), (state) => {
+            const nextState = reduce(state, DeleteFromArray(0));
+            expect(isEmpty(nextState)).toBe(true);
+          })
+        );
+      });
+
+      it("on objects of strings with path", () => {
+        assert(
+          property(
+            nonEmptyObject(fc.string()).chain(withObjectPath),
+            fc.nat(),
+            ({ state, path }, index) =>
+              expectNoOpFor(state, withPath(path)(DeleteFromArray(index)))
+          )
+        );
+      });
+
+      it.todo("on nested arrays with path");
     });
   });
 });
