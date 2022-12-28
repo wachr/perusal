@@ -215,6 +215,22 @@ describe(reduce.name, () => {
       expect(startState).toEqual(endState);
     });
 
+    it("can delete from a two-element array nested in an object", () => {
+      const state = { foo: "foo", bar: ["abc", "def"] };
+      const action = withPath("bar")(DeleteFromArray(1));
+      const expected = { foo: "foo", bar: "abc" };
+      expect(reduce(state, action)).toBeUndefined();
+      expect(state).toEqual(expected);
+    });
+
+    it("can delete from a two-element array nested in an array", () => {
+      const state = ["foo", ["abc", "def"]];
+      const action = withPath("1")(DeleteFromArray(1));
+      const expected = ["foo", "abc"];
+      expect(reduce(state, action)).toBeUndefined();
+      expect(state).toEqual(expected);
+    });
+
     it.each(defects)(
       "handles user-reported defect $#: $title",
       ({ action, state, expected, run }) => {

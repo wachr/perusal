@@ -85,7 +85,6 @@ describe(reduce.name, () => {
             ),
             nonEmptyString(),
             ({ state, path, index }, payload) => {
-              expect(Array.isArray(state[path])).toBe(true);
               const initialLength = state[path].length;
               const nextState = reduce(
                 state,
@@ -108,7 +107,6 @@ describe(reduce.name, () => {
             ),
             nonEmptyString(),
             ({ state, path, index }, payload) => {
-              expect(Array.isArray(state[path])).toBe(true);
               const initialLength = state[path].length;
               const nextState = reduce(
                 state,
@@ -146,8 +144,8 @@ describe(reduce.name, () => {
       it("on arrays of two elements", () => {
         assert(
           property(
-            fc.tuple(nonEmptyString(), nonEmptyString()),
-            fc.constantFrom(0, 1).map(String),
+            fc.tuple(nonEmptyString(), nonEmptyString()).noShrink(),
+            fc.constantFrom(0, 1).map(String).noShrink(),
             (state, index) => {
               const expected = state[index === "0" ? 1 : 0];
               const nextState = reduce(state, DeleteFromArray(index));
@@ -186,7 +184,6 @@ describe(reduce.name, () => {
                 .chain(withArrayPath)
             ),
             ({ state, path, index }) => {
-              expect(Array.isArray(state[path])).toBe(true);
               const initialLength = state[path].length;
               const initialValue = state[path][index];
               const nextState = reduce(
@@ -205,6 +202,25 @@ describe(reduce.name, () => {
       it.todo("on nested arrays of two elements inside objects with path");
       it.todo("on nested arrays of two elements inside arrays with path");
 
+      it("on nested arrays of two elements with path", () => {
+        assert(
+          property(
+            nested(
+              fc.tuple(nonEmptyString(), nonEmptyString()).chain(withArrayPath)
+            ).noShrink(),
+            ({ state, path, index }) => {
+              const expected = state[path][index === "0" ? 1 : 0];
+              const nextState = reduce(
+                state,
+                withPath(path)(DeleteFromArray(index))
+              );
+              expect(nextState).toBeUndefined();
+              expect(state[path]).toStrictEqual(expected);
+            }
+          )
+        );
+      });
+
       it.todo("on nested singleton arrays inside objects with path");
       it.todo("on nested singleton arrays inside arrays with path");
 
@@ -219,7 +235,7 @@ function nestedWithinObject(arbitrary) {
     .chain(withObjectPath)
     .chain(({ state, path }) =>
       arbitrary.chain(({ state: nested, path: index }) => {
-        const newState = Array.from(state);
+        const newState = { ...state };
         newState[path] = Array.from(nested);
         return fc.constant({
           state: newState,
@@ -235,9 +251,10 @@ function nestedWithinArray(arbitrary) {
     .chain(withArrayPath)
     .chain(({ state, path }) =>
       arbitrary.chain(({ state: nested, path: index }) => {
-        state[path] = Array.from(nested);
+        const newState = Array.from(state);
+        newState[path] = Array.from(nested);
         return fc.constant({
-          state,
+          state: newState,
           path,
           index,
         });

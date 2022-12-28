@@ -244,25 +244,50 @@ const reduce = trampoline(function _reduce(
         })
       )(state, state);
 
-    case DELETE_FROM_ARRAY:
+    case DELETE_FROM_ARRAY: {
+      const index = Number.parseInt(action.payload);
+      function arrayBoundaryCheck(leftTransform, rightTransform) {
+        return (state, unit) =>
+          onArray(() => {
+            if (state.length === 2) {
+              switch (index) {
+                case 0:
+                  return leftTransform(state, unit);
+                case 1:
+                  return rightTransform(state, unit);
+              }
+            }
+            state.splice(index, 1);
+          })(state, unit);
+      }
       return combine(
+        onObject(
+          onPath(() =>
+            arrayBoundaryCheck(
+              () => recur(state, SetKeyValueInObject(path, state[path][1])),
+              () => recur(state, SetKeyValueInObject(path, state[path][0]))
+            )(state[path], state)
+          )
+        ),
+        onArray(
+          onPath(() =>
+            arrayBoundaryCheck(
+              () => recur(state, ReplaceInArray(path, state[path][1])),
+              () => recur(state, ReplaceInArray(path, state[path][0]))
+            )(state[path], state)
+          )
+        ),
         onPath((_, unit) => {
           if (typeof state[path] !== "object") return unit;
           action.path.shift();
           return recur(state[path], action);
         }),
-        onArray(() => {
-          if (state.length === 2) {
-            switch (Number.parseInt(action.payload)) {
-              case 0:
-                return narrow(state[1]);
-              case 1:
-                return narrow(state[0]);
-            }
-          }
-          state.splice(action.payload, 1);
-        })
+        arrayBoundaryCheck(
+          (state) => narrow(state[1]),
+          (state) => narrow(state[0])
+        )
       )(state, state);
+    }
 
     case REPLACE_IN_ARRAY:
       return onArray(() =>

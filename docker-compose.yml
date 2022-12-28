@@ -27,6 +27,6 @@ services:
     ports:
       - "9229:9229"
     network_mode: "host"
-    command: "test:debug"
+    command: "test:debug ${TEST_ARGS:-}"
     profiles:
       - debug
