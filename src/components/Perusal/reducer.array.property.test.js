@@ -80,20 +80,9 @@ describe(reduce.name, () => {
       it("on nested arrays inside objects with path", () => {
         assert(
           property(
-            nonEmptyObject(nonEmptyString())
-              .chain(withObjectPath)
-              .chain(({ state: outer, path }) =>
-                nonEmptyArray(nonEmptyString()).chain((nested) =>
-                  fc.record({
-                    state: fc.constant({
-                      ...outer,
-                      [path]: Array.from(nested),
-                    }),
-                    path: fc.constant(path),
-                    index: fc.nat({ max: nested.length }),
-                  })
-                )
-              ),
+            nestedWithinObject(
+              nonEmptyArray(nonEmptyString()).chain(withArrayPath)
+            ),
             nonEmptyString(),
             ({ state, path, index }, payload) => {
               expect(Array.isArray(state[path])).toBe(true);
@@ -114,23 +103,10 @@ describe(reduce.name, () => {
       it("on nested arrays inside arrays with path", () => {
         assert(
           property(
-            nonEmptyArray(nonEmptyString())
-              .chain(withArrayPath)
-              .chain(({ state, path }) =>
-                nonEmptyArray(nonEmptyString()).chain((nested) => {
-                  const newState = Array.from(state);
-                  newState[path] = Array.from(nested);
-                  return fc.constant({ state: newState, path });
-                })
-              )
-              .chain(({ state, path }) =>
-                fc.record({
-                  state: fc.constant(state),
-                  path: fc.constant(path),
-                  index: fc.nat({ max: state[path].length }),
-                })
-              ),
-            fc.lorem().filter((str) => !str.match(/\s/)),
+            nestedWithinArray(
+              nonEmptyArray(nonEmptyString()).chain(withArrayPath)
+            ),
+            nonEmptyString(),
             ({ state, path, index }, payload) => {
               expect(Array.isArray(state[path])).toBe(true);
               const initialLength = state[path].length;
@@ -204,38 +180,10 @@ describe(reduce.name, () => {
       it("on nested arrays of more than two elements with path", () => {
         assert(
           property(
-            fc.oneof(
-              nonEmptyObject(fc.string())
-                .chain(withObjectPath)
-                .chain(({ state, path }) =>
-                  nonEmptyArray(nonEmptyString())
-                    .filter((arr) => arr.length > 2)
-                    .chain(withArrayPath)
-                    .chain(({ state: nested, path: index }) => {
-                      const newState = Array.from(state);
-                      newState[path] = Array.from(nested);
-                      return fc.constant({
-                        state: newState,
-                        path,
-                        index,
-                      });
-                    })
-                ),
+            nested(
               nonEmptyArray(nonEmptyString())
+                .filter((arr) => arr.length > 2)
                 .chain(withArrayPath)
-                .chain(({ state, path }) =>
-                  nonEmptyArray(nonEmptyString())
-                    .filter((arr) => arr.length > 2)
-                    .chain(withArrayPath)
-                    .chain(({ state: nested, path: index }) => {
-                      state[path] = Array.from(nested);
-                      return fc.constant({
-                        state,
-                        path,
-                        index,
-                      });
-                    })
-                )
             ),
             ({ state, path, index }) => {
               expect(Array.isArray(state[path])).toBe(true);
@@ -265,3 +213,38 @@ describe(reduce.name, () => {
     });
   });
 });
+
+function nestedWithinObject(arbitrary) {
+  return nonEmptyObject(fc.string())
+    .chain(withObjectPath)
+    .chain(({ state, path }) =>
+      arbitrary.chain(({ state: nested, path: index }) => {
+        const newState = Array.from(state);
+        newState[path] = Array.from(nested);
+        return fc.constant({
+          state: newState,
+          path,
+          index,
+        });
+      })
+    );
+}
+
+function nestedWithinArray(arbitrary) {
+  return nonEmptyArray(nonEmptyString())
+    .chain(withArrayPath)
+    .chain(({ state, path }) =>
+      arbitrary.chain(({ state: nested, path: index }) => {
+        state[path] = Array.from(nested);
+        return fc.constant({
+          state,
+          path,
+          index,
+        });
+      })
+    );
+}
+
+function nested(arbitrary) {
+  return fc.oneof(nestedWithinObject(arbitrary), nestedWithinArray(arbitrary));
+}
