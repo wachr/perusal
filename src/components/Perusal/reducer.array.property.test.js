@@ -199,9 +199,6 @@ describe(reduce.name, () => {
         );
       });
 
-      it.todo("on nested arrays of two elements inside objects with path");
-      it.todo("on nested arrays of two elements inside arrays with path");
-
       it("on nested arrays of two elements with path", () => {
         assert(
           property(
@@ -221,11 +218,44 @@ describe(reduce.name, () => {
         );
       });
 
-      it.todo("on nested singleton arrays inside objects with path");
-      it.todo("on nested singleton arrays inside arrays with path");
+      it("on nested singleton arrays inside objects with path", () => {
+        assert(
+          property(
+            nestedWithinObject(
+              fc.tuple(nonEmptyString()).chain(withArrayPath)
+            ).noShrink(),
+            ({ state, path, index }) => {
+              const nextState = reduce(
+                state,
+                withPath(path)(DeleteFromArray(index))
+              );
+              expect(nextState).toBeUndefined();
+              expect(Object.keys(state)).toContain(path);
+              expect(isEmpty(state[path])).toBe(true);
+            }
+          )
+        );
+      });
 
-      it.todo("on nested empty arrays inside objects with path");
-      it.todo("on nested empty arrays inside arrays with path");
+      it("on nested singleton arrays inside arrays with path", () => {
+        assert(
+          property(
+            nestedWithinArray(
+              fc.tuple(nonEmptyString()).chain(withArrayPath)
+            ).noShrink(),
+            ({ state, path, index }) => {
+              const initialLength = state.length;
+              const nextState = reduce(
+                state,
+                withPath(path)(DeleteFromArray(index))
+              );
+              expect(nextState).toBeUndefined();
+              expect(state.length).toBe(initialLength);
+              expect(isEmpty(state[path])).toBe(true);
+            }
+          )
+        );
+      });
     });
   });
 });
