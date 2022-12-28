@@ -444,7 +444,67 @@ describe(reduce.name, () => {
         );
       });
 
-      it.todo("on nested arrays with path");
+      it("on nested arrays of more than two elements with path", () => {
+        assert(
+          property(
+            fc.oneof(
+              nonEmptyObject(fc.string())
+                .chain(withObjectPath)
+                .chain(({ state, path }) =>
+                  nonEmptyArray(nonEmptyString())
+                    .filter((arr) => arr.length > 2)
+                    .chain(withArrayPath)
+                    .chain(({ state: nested, path: index }) => {
+                      const newState = Array.from(state);
+                      newState[path] = Array.from(nested);
+                      return fc.constant({
+                        state: newState,
+                        path,
+                        index,
+                      });
+                    })
+                ),
+              nonEmptyArray(nonEmptyString())
+                .chain(withArrayPath)
+                .chain(({ state, path }) =>
+                  nonEmptyArray(nonEmptyString())
+                    .filter((arr) => arr.length > 2)
+                    .chain(withArrayPath)
+                    .chain(({ state: nested, path: index }) => {
+                      state[path] = Array.from(nested);
+                      return fc.constant({
+                        state,
+                        path,
+                        index,
+                      });
+                    })
+                )
+            ),
+            ({ state, path, index }) => {
+              expect(Array.isArray(state[path])).toBe(true);
+              const initialLength = state[path].length;
+              const initialValue = state[path][index];
+              const nextState = reduce(
+                state,
+                withPath(path)(DeleteFromArray(index))
+              );
+              expect(nextState).toBeUndefined();
+              expect(Array.isArray(state[path])).toBe(true);
+              expect(state[path].length).toBe(initialLength - 1);
+              expect(state[path]).not.toContain(initialValue);
+            }
+          )
+        );
+      });
+
+      it.todo("on nested arrays of two elements inside objects with path");
+      it.todo("on nested arrays of two elements inside arrays with path");
+
+      it.todo("on nested singleton arrays inside objects with path");
+      it.todo("on nested singleton arrays inside arrays with path");
+
+      it.todo("on nested empty arrays inside objects with path");
+      it.todo("on nested empty arrays inside arrays with path");
     });
   });
 });

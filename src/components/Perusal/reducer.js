@@ -229,35 +229,40 @@ const reduce = trampoline(function _reduce(
 
     case ADD_TO_ARRAY:
       return combine(
-        onArray((_, unit) => {
-          if (path) {
-            if (typeof state[path] !== "object") return unit;
-            action.path.shift();
-            return recur(state[path], action);
-          }
-          state.splice(action.payload.index, 0, narrow(action.payload.element));
+        onPath((_, unit) => {
+          if (typeof state[path] !== "object") return unit;
+          action.path.shift();
+          return recur(state[path], action);
         }),
-        onObject(
-          onPath((_, unit) => {
-            if (typeof state[path] !== "object") return unit;
-            action.path.shift();
-            return recur(state[path], action);
-          })
-        )
+        onArray(() => {
+          if (!path)
+            state.splice(
+              action.payload.index,
+              0,
+              narrow(action.payload.element)
+            );
+        })
       )(state, state);
 
     case DELETE_FROM_ARRAY:
-      return onArray(() => {
-        if (state.length === 2) {
-          switch (Number.parseInt(action.payload)) {
-            case 0:
-              return narrow(state[1]);
-            case 1:
-              return narrow(state[0]);
+      return combine(
+        onPath((_, unit) => {
+          if (typeof state[path] !== "object") return unit;
+          action.path.shift();
+          return recur(state[path], action);
+        }),
+        onArray(() => {
+          if (state.length === 2) {
+            switch (Number.parseInt(action.payload)) {
+              case 0:
+                return narrow(state[1]);
+              case 1:
+                return narrow(state[0]);
+            }
           }
-        }
-        state.splice(action.payload, 1);
-      }, state)(state);
+          state.splice(action.payload, 1);
+        })
+      )(state, state);
 
     case REPLACE_IN_ARRAY:
       return onArray(() =>
