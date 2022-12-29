@@ -37,18 +37,6 @@ describe(reduce.name, () => {
     });
 
     describe(AddToArray.name, () => {
-      it("on strings", () => {
-        assert(
-          property(
-            fc.string(),
-            fc.nat(),
-            nonEmptyString(),
-            (state, index, payload) =>
-              expectNoOpFor(state, AddToArray(index, payload))
-          )
-        );
-      });
-
       it("on arrays", () => {
         assert(
           property(
