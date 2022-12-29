@@ -290,17 +290,24 @@ const reduce = trampoline(function _reduce(
     }
 
     case REPLACE_IN_ARRAY:
-      return onArray(() =>
-        isEmpty(action.payload.element)
-          ? recur(
-              state,
-              withPath(...action.path)(DeleteFromArray(action.payload.index))
-            )
-          : void state.splice(
-              action.payload.index,
-              1,
-              narrow(action.payload.element)
-            )
+      return combine(
+        onPath((_, unit) => {
+          if (typeof state[path] !== "object") return unit;
+          action.path.shift();
+          return recur(state[path], action);
+        }),
+        onArray(() =>
+          isEmpty(action.payload.element)
+            ? recur(
+                state,
+                withPath(...action.path)(DeleteFromArray(action.payload.index))
+              )
+            : void state.splice(
+                action.payload.index,
+                1,
+                narrow(action.payload.element)
+              )
+        )
       )(state, state);
 
     case PROMOTE_STRING_TO_OBJECT: {

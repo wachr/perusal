@@ -7,11 +7,11 @@ export function empties() {
 }
 
 export function nonEmptyString() {
-  return fc.string({ minLength: 1 });
+  return fc.string({ minLength: 1 }).filter((s) => s.match(/^\S/));
 }
 
 export function nonEmptyArray(arb) {
-  return fc.uniqueArray(arb, { minLength: 1 });
+  return fc.uniqueArray(arb, { minLength: 1 }).filter(Array.isArray);
 }
 
 export function nonEmptyObject(arb) {

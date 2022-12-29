@@ -11,7 +11,12 @@ import { assert, property } from "fast-check";
 import * as fc from "fast-check";
 
 import { isEmpty } from "./ops";
-import reduce, { AddToArray, DeleteFromArray, withPath } from "./reducer";
+import reduce, {
+  AddToArray,
+  DeleteFromArray,
+  ReplaceInArray,
+  withPath,
+} from "./reducer";
 
 describe(reduce.name, () => {
   beforeAll(() => {
@@ -20,7 +25,7 @@ describe(reduce.name, () => {
 
   describe("array actions", () => {
     it.each(
-      [AddToArray, DeleteFromArray].map((actionCreator) => [
+      [AddToArray, DeleteFromArray, ReplaceInArray].map((actionCreator) => [
         actionCreator.name,
         actionCreator,
       ])
@@ -245,6 +250,39 @@ describe(reduce.name, () => {
         );
       });
     });
+
+    describe(ReplaceInArray.name, () => {
+      it("on arrays", () => {
+        assert(
+          property(
+            nonEmptyArray(fc.string()).chain(withArrayPath),
+            nonEmptyString(),
+            ({ state, path }, payload) => {
+              const nextState = reduce(state, ReplaceInArray(path, payload));
+              expect(nextState).toBeUndefined();
+              expect(state[path]).toStrictEqual(payload);
+            }
+          )
+        );
+      });
+
+      it("on nested arrays", () => {
+        assert(
+          property(
+            nested(nonEmptyArray(fc.string()).chain(withArrayPath)).noShrink(),
+            nonEmptyString(),
+            ({ state, path, index }, payload) => {
+              const nextState = reduce(
+                state,
+                withPath(path)(ReplaceInArray(index, payload))
+              );
+              expect(nextState).toBeUndefined();
+              expect(state[path][index]).toStrictEqual(payload);
+            }
+          )
+        );
+      });
+    });
   });
 });
 
@@ -254,7 +292,7 @@ function nestedWithinObject(arbitrary) {
     .chain(({ state, path }) =>
       arbitrary.chain(({ state: nested, path: index }) => {
         const newState = { ...state };
-        newState[path] = Array.from(nested);
+        newState[path] = [...nested];
         return fc.constant({
           state: newState,
           path,
@@ -269,8 +307,8 @@ function nestedWithinArray(arbitrary) {
     .chain(withArrayPath)
     .chain(({ state, path }) =>
       arbitrary.chain(({ state: nested, path: index }) => {
-        const newState = Array.from(state);
-        newState[path] = Array.from(nested);
+        const newState = [...state];
+        newState[path] = [...nested];
         return fc.constant({
           state: newState,
           path,
