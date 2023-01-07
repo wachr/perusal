@@ -1,3 +1,6 @@
+import defects from "../../test/resources/defects.json";
+import { expectNoOpFor } from "./reducer.property";
+
 import reduce, {
   AddToArray,
   DeleteFromArray,
@@ -18,18 +21,37 @@ beforeAll(() => {
 
 describe(reduce.name, () => {
   test.each(["", {}, []])("should narrow empty %p to {}", (empty) => {
-    expect(reduce(empty, Narrow())).toStrictEqual({});
+    expect(reduce(empty, Narrow())).toStrictEqual("");
   });
 
   it("should narrow by default", () => {
     expect(reduce(["foo"])).toBe("foo");
   });
 
-  it("should no-op if the dispatched action does not match the state's type", () => {
-    expect(reduce(["foo", "bar"], PromoteStringToArray("baz"))).toEqual([
-      "foo",
-      "bar",
-    ]);
+  describe("should no-op", () => {
+    it.each([
+      [AddToArray.name, "foo", AddToArray(0, "bar")],
+      [DeleteFromArray.name, "foo", DeleteFromArray(0)],
+      [DeleteFromObject.name, "foo", DeleteFromObject("bar")],
+      [DeleteString.name, ["foo"], DeleteString()],
+      [DemoteObjectToArray.name, "foo", DemoteObjectToArray()],
+      [PromoteEmptyToString.name, "foo", PromoteEmptyToString("bar")],
+      [PromoteStringToArray.name, ["foo"], PromoteStringToArray("bar")],
+      [PromoteStringToObject.name, ["foo"], PromoteStringToObject("bar")],
+      [ReplaceString.name, ["foo"], ReplaceString("bar")],
+    ])(
+      "if the dispatched action %s does not match the state's type",
+      (_, state, action) => expect(reduce(state, action)).toBe(state)
+    );
+
+    it.each([{}, "foo", ["foo", "bar"], { foo: "bar" }])(
+      "if the dispatched action type is not recognized %#",
+      (state) => {
+        expect(
+          reduce(state, { type: "simulated-unrecognized-action-type" })
+        ).toBe(state);
+      }
+    );
   });
 
   it("should coerce to string if promoting an empty to string", () => {
@@ -43,12 +65,12 @@ describe(reduce.name, () => {
   });
 
   it("should delete a string into an empty state", () => {
-    expect(reduce("foo", DeleteString())).toStrictEqual({});
+    expect(reduce("foo", DeleteString())).toStrictEqual("");
   });
 
   it("should delete a string from an array of strings", () => {
     const state = [" ", " "];
-    expect(reduce(state, withPath(0)(DeleteString()))).toBe(undefined);
+    expect(reduce(state, withPath("0")(DeleteString()))).toBe(undefined);
     expect(state).toStrictEqual([" "]);
   });
 
@@ -94,39 +116,25 @@ describe(reduce.name, () => {
     expect(reduce("foo", PromoteStringToObject("bar"))).toEqual({ foo: "bar" });
   });
 
-  it("should demote an object with an empty right hand side to a string", () => {
-    expect(reduce({ foo: "" }, Narrow())).toEqual("foo");
+  it("should narrow an object with an empty right hand side to a normalized empty", () => {
+    expect(reduce({ foo: "", bar: "baz" }, Narrow())).toEqual({
+      foo: "",
+      bar: "baz",
+    });
   });
 
-  it(
-    "should demote an object with an empty left hand side and a string " +
-      "right hand side to a string",
-    () => {
-      expect(reduce({ "": "foo" }, Narrow())).toEqual("foo");
-    }
-  );
-
-  it(
-    "should demote an object with an empty left hand side and an array " +
-      "right hand side to an array",
-    () => {
-      expect(reduce({ "": ["foo", "bar"] }, Narrow())).toEqual(["foo", "bar"]);
-    }
-  );
-
-  it(
-    "should demote an object with an empty left hand side and an empty " +
-      "right hand side to an empty",
-    () => {
-      expect(reduce({ "": [] }, Narrow())).toEqual({});
-    }
-  );
+  it("should no-op an object with an empty left hand side", () => {
+    expectNoOpFor({ "": "foo", bar: "baz" }, Narrow());
+    expectNoOpFor({ "": ["foo", "bar"], bar: "baz" }, Narrow());
+    expectNoOpFor({ "": "", bar: "baz" }, Narrow());
+  });
 
   describe("reducing objects", () => {
     it("can delete a given key from an object", () => {
       const input = { a: "x", b: "y", c: "z" };
       const output = { a: "x", c: "z" };
-      expect(reduce(input, DeleteFromObject("b"))).toEqual(output);
+      expect(reduce(input, DeleteFromObject("b"))).toBeUndefined();
+      expect(input).toEqual(output);
     });
 
     it("can demote an object to an array", () => {
@@ -141,48 +149,25 @@ describe(reduce.name, () => {
       expect(reduce(input, DemoteObjectToArray())).toEqual(output);
     });
 
-    it("will narrow every value of an object", () => {
-      const input = { a: "a", b: ["b", "", "b"], c: {}, d: "" };
-      expect(reduce(input, Narrow())).toEqual([
-        { a: "a", b: ["b", "b"] },
-        "c",
-        "d",
-      ]);
-    });
-
-    it("will demote an object to an array if any key is empty", () => {
-      const input = { a: "a", b: "b", "": "c" };
-      const output = [{ a: "a", b: "b" }, "c"];
-      expect(reduce(input, Narrow())).toEqual(output);
-    });
-
-    it("will demote an object to an array if any value is empty", () => {
-      const input = { a: "a", b: "b", c: "" };
-      const output = [{ a: "a", b: "b" }, "c"];
-      expect(reduce(input, Narrow())).toEqual(output);
-    });
-
-    it.each([{ a: "a", b: "b", "": "c", d: "" }])(
-      "should not lose information narrowing objects with empties %#",
-      (input) => {
-        expect(reduce(input, Narrow())).toEqual([{ a: "a", b: "b" }, "c", "d"]);
-      }
+    it.each([
+      [{ "": [] }, ""],
+      [{ "": "" }, ""],
+      [{ a: "" }, "a"],
+      [{ "": "a" }, "a"],
+      [{ "": ["a", "b"] }, ["a", "b"]],
+      [{ a: "", b: "" }, ["a", "b"]],
+      [{ a: { b: "" } }, { a: "b" }],
+    ])("narrows objects %#", (input, output) =>
+      expect(reduce(input, Narrow())).toEqual(output)
     );
 
     it.each([
-      [{ "": [] }, {}],
-      [{ "": "" }, {}],
-      [{ a: "" }, "a"],
-      [{ "": "a" }, "a"],
-      [{ "": "a", b: "c" }, [{ b: "c" }, "a"]],
-      [{ "": "a", b: "" }, ["a", "b"]],
-      [{ "": ["a", "b"] }, ["a", "b"]],
-      [{ a: "", b: "" }, ["a", "b"]],
-      [{ a: "", b: ["c", "d"] }, [{ b: ["c", "d"] }, "a"]],
-      [{ a: { b: "" } }, { a: "b" }],
-    ])("narrows objects %#", (input, output) => {
-      expect(reduce(input, Narrow())).toEqual(output);
-    });
+      { "": "a", b: "" },
+      { "": "a", b: "c" },
+      { a: "", b: ["c", "d"] },
+    ])("narrowing object is no-op %#", (input) =>
+      expectNoOpFor(input, Narrow())
+    );
   });
 
   describe("reproducing user testing", () => {
@@ -194,22 +179,30 @@ describe(reduce.name, () => {
       expect(startState).toEqual(endState);
     });
 
-    it("addresses nested object delete string defect", async () => {
-      const defect = await import(
-        "../../test/resources/defects/nested-object-delete-string.json"
-      );
-      const result = reduce(defect.state, defect.action);
-      if (result !== undefined) expect(result).toBe(defect.expected);
-      else expect(defect.state).toStrictEqual(defect.expected);
+    it("can delete from a two-element array nested in an object", () => {
+      const state = { foo: "foo", bar: ["abc", "def"] };
+      const action = withPath("bar")(DeleteFromArray(1));
+      const expected = { foo: "foo", bar: "abc" };
+      expect(reduce(state, action)).toBeUndefined();
+      expect(state).toEqual(expected);
     });
 
-    it.only("handles nested singleton array string deletion", async () => {
-      const defect = await import(
-        "../../test/resources/defects/nested-singleton-array-delete-string.json"
-      );
-      const result = reduce(defect.state, defect.action);
-      if (result !== undefined) expect(result).toBe(defect.expected);
-      else expect(defect.state).toStrictEqual(defect.expected);
+    it("can delete from a two-element array nested in an array", () => {
+      const state = ["foo", ["abc", "def"]];
+      const action = withPath("1")(DeleteFromArray(1));
+      const expected = ["foo", "abc"];
+      expect(reduce(state, action)).toBeUndefined();
+      expect(state).toEqual(expected);
     });
+
+    it.each(defects)(
+      "handles user-reported defect $#: $title",
+      ({ action, state, expected, run }) => {
+        if (defects.some((defect) => defect.run) && !run) return;
+        const result = reduce(state, action);
+        if (result !== undefined) expect(result).toStrictEqual(expected);
+        else expect(state).toStrictEqual(expected);
+      }
+    );
   });
 });

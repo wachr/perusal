@@ -2,7 +2,15 @@ import trampoline from "../../utils/trampoline";
 import { nolookalikesSafe } from "nanoid-dictionary";
 import { customAlphabet } from "nanoid/non-secure";
 
-import { combine, isEmpty, onArray, onEmpty, onObject, onString } from "./ops";
+import {
+  combine,
+  isEmpty,
+  onArray,
+  onCondition,
+  onEmpty,
+  onObject,
+  onString,
+} from "./ops";
 
 function generateRandomPerusal(size = 5) {
   function randomIntExclusive(max) {
@@ -28,39 +36,33 @@ function generateRandomPerusal(size = 5) {
 }
 
 function narrow(state) {
-  function partition(condition) {
-    return (arr) =>
-      !Array.isArray(arr)
-        ? []
-        : arr.reduce(
-            ([pass, fail], elem) =>
-              condition(elem)
-                ? [[...pass, elem], fail]
-                : [pass, [...fail, elem]],
-            [[], []]
-          );
-  }
   return combine(
-    onEmpty(() => ({})),
+    onEmpty(() => ""),
     onString(() => state),
     onArray(() =>
       state.length === 1
         ? narrow(state[0])
         : state.map(narrow).filter((item) => !isEmpty(item))
     ),
-    onObject(() => {
-      const [partials, entries] = partition((entry) => entry.some(isEmpty))(
+    onObject(
+      onCondition(
+        () =>
+          Object.entries(state).length === 1 &&
+          Object.entries(state)[0].some(isEmpty),
+        () => narrow(Object.entries(state)[0].filter((e) => !isEmpty(e))[0])
+      )
+    ),
+    onObject(
+      onCondition(
+        () => Object.values(state).every(isEmpty),
+        () => Object.keys(state)
+      )
+    ),
+    onObject(() =>
+      Object.fromEntries(
         Object.entries(state).map(([key, value]) => [key, narrow(value)])
-      );
-      const filteredPartials = partials.flat().filter((e) => !isEmpty(e));
-      return filteredPartials.length === 0
-        ? Object.fromEntries(entries)
-        : narrow(
-            entries.length === 0
-              ? filteredPartials
-              : [Object.fromEntries(entries), ...filteredPartials]
-          );
-    })
+      )
+    )
   )(state, state);
   // We use state as the unitValue so this becomes
   // a passthrough for unrecognized state shapes.
@@ -133,6 +135,8 @@ export function SetKeyValueInObject(key, value) {
 }
 
 export function withPath(...pathParts) {
+  if (pathParts.some((e) => typeof e !== "string"))
+    throw new Error("withPath requires arguments to be strings");
   return (action) => {
     !!action.path
       ? action.path.unshift(...pathParts)
@@ -146,28 +150,19 @@ const reduce = trampoline(function _reduce(
   action = { type: NARROW, payload: undefined, path: [], recursive: false }
 ) {
   if (!!global.structuredClone)
-    console.log({
-      action: structuredClone(action),
-      state: JSON.parse(JSON.stringify(state)),
-    });
-  function followPath(state, action) {
-    return (
-      Array.isArray(action.path) &&
-      action.path.length > 1 &&
-      (!Array.isArray(state) ||
-        state.length > 2 ||
-        ![DELETE_STRING].includes(action.type))
-    );
-  }
-  function recur(state, action) {
-    action.recursive = true;
-    return () => _reduce(state, action);
-  }
+    if (action?.recursive) console.log("recursive reduction");
+    else
+      console.log({
+        action: structuredClone(action),
+        state: state && JSON.parse(JSON.stringify(state)),
+      });
+
   const path = Array.isArray(action.path) && action.path[0];
   if (followPath(state, action)) {
     action.path.shift();
     return recur(state[path], action);
   }
+
   switch (action.type) {
     case NARROW:
       return narrow(state);
@@ -179,9 +174,11 @@ const reduce = trampoline(function _reduce(
       const newString = narrow(String(action.payload));
       return combine(
         onEmpty(() => newString),
-        onObject(() => {
-          if (!!path) state[path] = newString;
-        })
+        onObject(
+          onPath(() => {
+            state[path] = newString;
+          })
+        )
       )(state, state);
     }
 
@@ -189,18 +186,16 @@ const reduce = trampoline(function _reduce(
       const newString = narrow(String(action.payload));
       return combine(
         onString(() => newString),
-        onArray(() => void state.splice(path, 1, newString)),
-        onObject(() => {
-          state[path] = newString;
-        })
+        onArray(onPath(() => void state.splice(path, 1, newString))),
+        onObject(onPath(() => void (state[path] = newString)))
       )(state, state);
     }
 
     case DELETE_STRING:
       return combine(
         onString(() => narrow("")),
-        onArray(() => {
-          if (path !== undefined && path !== null && path !== false) {
+        onArray(
+          onPath(() => {
             if (action?.path?.length > 1)
               return recur(
                 state[path],
@@ -210,101 +205,158 @@ const reduce = trampoline(function _reduce(
               state,
               withPath(...action.path)(DeleteFromArray(action.path.slice(1)))
             );
-          }
-        }),
-        onObject(() => {
-          if (!!path)
-            return recur(state, SetKeyValueInObject(path, narrow("")));
-        })
+          })
+        ),
+        onObject(
+          onPath(() => recur(state, SetKeyValueInObject(path, narrow(""))))
+        )
       )(state, state);
 
     case PROMOTE_STRING_TO_ARRAY: {
       const newString = narrow(String(action.payload));
       return combine(
         onString(() => [state, newString]),
-        onArray((_, unit) =>
-          path ? void state.splice(path, 1, [state[path], newString]) : unit
+        onArray(
+          onPath(() =>
+            recur(state, ReplaceInArray(path, [state[path], newString]))
+          )
+        ),
+        onObject(
+          onPath(() =>
+            recur(state, SetKeyValueInObject(path, [state[path], newString]))
+          )
         )
       )(state, state);
     }
 
     case ADD_TO_ARRAY:
-      onArray(
-        () =>
-          void state.splice(
-            action.payload.index,
-            0,
-            narrow(action.payload.element)
-          ),
-        state
-      )(state);
-      return;
+      return combine(
+        onPath((_, unit) => {
+          if (typeof state[path] !== "object") return unit;
+          action.path.shift();
+          return recur(state[path], action);
+        }),
+        onArray(() => {
+          if (!path)
+            state.splice(
+              action.payload.index,
+              0,
+              narrow(action.payload.element)
+            );
+        })
+      )(state, state);
 
-    case DELETE_FROM_ARRAY:
-      return onArray(() => {
-        if (state.length === 2) {
-          switch (Number.parseInt(action.payload)) {
-            case 0:
-              return narrow(state[1]);
-            case 1:
-              return narrow(state[0]);
-          }
-        }
-        state.splice(action.payload, 1);
-      }, state)(state);
+    case DELETE_FROM_ARRAY: {
+      const index = Number.parseInt(action.payload);
+      function arrayBoundaryCheck(leftTransform, rightTransform) {
+        return (state, unit) =>
+          onArray(() => {
+            if (state.length === 2) {
+              switch (index) {
+                case 0:
+                  return leftTransform(state, unit);
+                case 1:
+                  return rightTransform(state, unit);
+              }
+            }
+            state.splice(index, 1);
+          })(state, unit);
+      }
+      return combine(
+        onObject(
+          onPath(() =>
+            arrayBoundaryCheck(
+              () => recur(state, SetKeyValueInObject(path, state[path][1])),
+              () => recur(state, SetKeyValueInObject(path, state[path][0]))
+            )(state[path], state)
+          )
+        ),
+        onArray(
+          onPath(() =>
+            arrayBoundaryCheck(
+              () => recur(state, ReplaceInArray(path, state[path][1])),
+              () => recur(state, ReplaceInArray(path, state[path][0]))
+            )(state[path], state)
+          )
+        ),
+        onPath((_, unit) => {
+          if (typeof state[path] !== "object") return unit;
+          action.path.shift();
+          return recur(state[path], action);
+        }),
+        arrayBoundaryCheck(
+          (state) => narrow(state[1]),
+          (state) => narrow(state[0])
+        )
+      )(state, state);
+    }
 
     case REPLACE_IN_ARRAY:
-      return onArray(() =>
-        isEmpty(action.payload.element)
-          ? recur(
-              state,
-              withPath(...action.path)(DeleteFromArray(action.payload.index))
-            )
-          : void state.splice(
-              action.payload.index,
-              1,
-              narrow(action.payload.element)
-            )
+      return combine(
+        onPath((_, unit) => {
+          if (typeof state[path] !== "object") return unit;
+          action.path.shift();
+          return recur(state[path], action);
+        }),
+        onArray(() =>
+          isEmpty(action.payload.element)
+            ? recur(
+                state,
+                withPath(...action.path)(DeleteFromArray(action.payload.index))
+              )
+            : void state.splice(
+                action.payload.index,
+                1,
+                narrow(action.payload.element)
+              )
+        )
       )(state, state);
 
     case PROMOTE_STRING_TO_OBJECT: {
       return combine(
         onString(() => ({ [state]: narrow(action.payload) })),
-        onArray(() => {
-          state.splice(path, 1, { [state[path]]: narrow(action.payload) });
-        }),
-        onObject(() => {
-          const newKey = path;
-          const newValue = { [state[path]]: narrow(String(action.payload)) };
-          const newAction = withPath(path)(
-            SetKeyValueInObject(newKey, newValue)
-          );
-          return recur(state, newAction);
-        })
+        onArray(
+          onPath(
+            () =>
+              void state.splice(path, 1, {
+                [state[path]]: narrow(action.payload),
+              })
+          )
+        ),
+        onObject(
+          onPath(() =>
+            recur(
+              state,
+              withPath(path)(
+                SetKeyValueInObject(path, {
+                  [state[path]]: narrow(String(action.payload)),
+                })
+              )
+            )
+          )
+        )
       )(state, state);
     }
 
-    case DELETE_KEY_FROM_OBJECT: {
-      function withoutKey(obj, key) {
-        if (!obj) return narrow({});
-        const { [key]: _, ...withoutKey } = obj;
-        return narrow(withoutKey);
-      }
+    case DELETE_KEY_FROM_OBJECT:
       return combine(
-        onArray(() =>
-          recur(
-            state,
-            withPath(...action.path.slice(0, -1))(
-              ReplaceInArray(
-                action.path.slice(-1),
-                withoutKey(state[action.path.slice(-1)], action.payload)
+        onArray(
+          onPath(() =>
+            recur(
+              state[path],
+              withPath(...action.path.slice(1))(
+                DeleteFromObject(action.payload)
               )
             )
           )
         ),
-        onObject(() => withoutKey(state, action.payload))
+        onObject(
+          onCondition(
+            () => Object.keys(state).includes(action.payload),
+            () => void delete state[action.payload]
+          )
+        )
       )(state, state);
-    }
 
     case DEMOTE_OBJECT_TO_ARRAY:
       return narrow(
@@ -316,12 +368,31 @@ const reduce = trampoline(function _reduce(
 
     case SET_KEY_VALUE_IN_OBJECT:
       return combine(
-        onArray(() => recur(state[path], action)),
+        onArray(onPath(() => recur(state[path], action))),
         onObject(() => void (state[action.payload.key] = action.payload.value))
       )(state, state);
 
     default:
       return action.payload || state;
+  }
+
+  function recur(state, action) {
+    action.recursive = true;
+    return () => _reduce(state, action);
+  }
+
+  function followPath(state, action) {
+    return (
+      Array.isArray(action.path) &&
+      action.path.length > 1 &&
+      (!Array.isArray(state) ||
+        state.length > 2 ||
+        ![DELETE_STRING].includes(action.type))
+    );
+  }
+
+  function onPath(transform) {
+    return (a, unit) => (path ? transform(a, unit) : unit);
   }
 });
 

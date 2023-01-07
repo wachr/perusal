@@ -1,0 +1,95 @@
+[
+  {
+    "title": "nested object delete string",
+    "action": {
+      "type": "delete-string",
+      "path": ["0", "8DWRrcwhc", "njJBM9"]
+    },
+    "state": [
+      {
+        "8DWRrcwhc": {
+          "njJBM9": "nWKm"
+        }
+      },
+      ["NKCJFdct", "7mQR2"]
+    ],
+    "expected": [
+      {
+        "8DWRrcwhc": {
+          "njJBM9": ""
+        }
+      },
+      ["NKCJFdct", "7mQR2"]
+    ]
+  },
+  {
+    "title": "nested singleton array delete string",
+    "action": { "type": "delete-string" },
+    "state": [[" "]],
+    "expected": [[" "]]
+  },
+  {
+    "title": "promote string to array in deeply nested object",
+    "action": {
+      "type": "promote-string-to-array",
+      "payload": "54N-e",
+      "path": ["3", "0", "Mkrwb8PnFJ", "1", "USkFO"]
+    },
+    "state": [
+      "T9w8",
+      "f6dfTbL",
+      "Cb9gfFQcpTt",
+      [
+        {
+          "Mkrwb8PnFJ": [
+            "MTn7FcWF",
+            {
+              " tfgrrRbbHQh": "fEXN1",
+              "USkFO": "ZdSg-",
+              "vtXVo": "kXHnX"
+            },
+            {
+              "chDbKzNCFz": "cSysM",
+              "yo8DR": "LzSgU",
+              "grweC": "KYKrx"
+            }
+          ]
+        },
+        "7pMCdpnfHkp"
+      ]
+    ],
+    "expected": [
+      "T9w8",
+      "f6dfTbL",
+      "Cb9gfFQcpTt",
+      [
+        {
+          "Mkrwb8PnFJ": [
+            "MTn7FcWF",
+            {
+              " tfgrrRbbHQh": "fEXN1",
+              "USkFO": ["ZdSg-", "54N-e"],
+              "vtXVo": "kXHnX"
+            },
+            {
+              "chDbKzNCFz": "cSysM",
+              "yo8DR": "LzSgU",
+              "grweC": "KYKrx"
+            }
+          ]
+        },
+        "7pMCdpnfHkp"
+      ]
+    ]
+  },
+  {
+    "title": "add to nested array",
+    "state": { "foo": ["bar", "bing"] },
+    "action": {
+      "path": ["foo"],
+      "type": "add-to-array",
+      "payload": { "index": 0, "element": "baz" }
+    },
+    "expected": { "foo": ["baz", "bar", "bing"] }
+  }
+]
