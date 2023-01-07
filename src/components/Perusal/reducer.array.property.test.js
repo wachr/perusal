@@ -1,6 +1,9 @@
 import {
   empties,
   expectNoOpFor,
+  nested,
+  nestedWithinArray,
+  nestedWithinObject,
   nonEmptyArray,
   nonEmptyObject,
   nonEmptyString,
@@ -285,39 +288,3 @@ describe(reduce.name, () => {
     });
   });
 });
-
-function nestedWithinObject(arbitrary) {
-  return nonEmptyObject(fc.string())
-    .chain(withObjectPath)
-    .chain(({ state, path }) =>
-      arbitrary.chain(({ state: nested, path: index }) => {
-        const newState = { ...state };
-        newState[path] = [...nested];
-        return fc.constant({
-          state: newState,
-          path,
-          index,
-        });
-      })
-    );
-}
-
-function nestedWithinArray(arbitrary) {
-  return nonEmptyArray(nonEmptyString())
-    .chain(withArrayPath)
-    .chain(({ state, path }) =>
-      arbitrary.chain(({ state: nested, path: index }) => {
-        const newState = [...state];
-        newState[path] = [...nested];
-        return fc.constant({
-          state: newState,
-          path,
-          index,
-        });
-      })
-    );
-}
-
-function nested(arbitrary) {
-  return fc.oneof(nestedWithinObject(arbitrary), nestedWithinArray(arbitrary));
-}

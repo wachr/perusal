@@ -35,7 +35,7 @@ export function withObjectPath(obj) {
 export function expectNoOpFor(state, action) {
   const initialState = state && JSON.parse(JSON.stringify(state));
   const nextState = reduce(state, action);
-  expect(nextState).toBe(state);
+  expect(nextState).toStrictEqual(state);
   expect(state).toStrictEqual(initialState);
 }
 
@@ -51,4 +51,40 @@ export function expectNestedToStrictEqual(actionCreator, valueSupplier) {
       valueSupplier(initialValue, actionPayload)
     );
   };
+}
+
+export function nestedWithinObject(arbitrary) {
+  return nonEmptyObject(fc.string())
+    .chain(withObjectPath)
+    .chain(({ state, path }) =>
+      arbitrary.chain(({ state: nested, path: index }) => {
+        const newState = { ...state };
+        newState[path] = [...nested];
+        return fc.constant({
+          state: newState,
+          path,
+          index,
+        });
+      })
+    );
+}
+
+export function nestedWithinArray(arbitrary) {
+  return nonEmptyArray(nonEmptyString())
+    .chain(withArrayPath)
+    .chain(({ state, path }) =>
+      arbitrary.chain(({ state: nested, path: index }) => {
+        const newState = [...state];
+        newState[path] = [...nested];
+        return fc.constant({
+          state: newState,
+          path,
+          index,
+        });
+      })
+    );
+}
+
+export function nested(arbitrary) {
+  return fc.oneof(nestedWithinObject(arbitrary), nestedWithinArray(arbitrary));
 }

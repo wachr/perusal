@@ -2,7 +2,15 @@ import trampoline from "../../utils/trampoline";
 import { nolookalikesSafe } from "nanoid-dictionary";
 import { customAlphabet } from "nanoid/non-secure";
 
-import { combine, isEmpty, onArray, onEmpty, onObject, onString } from "./ops";
+import {
+  combine,
+  isEmpty,
+  onArray,
+  onCondition,
+  onEmpty,
+  onObject,
+  onString,
+} from "./ops";
 
 function generateRandomPerusal(size = 5) {
   function randomIntExclusive(max) {
@@ -28,39 +36,33 @@ function generateRandomPerusal(size = 5) {
 }
 
 function narrow(state) {
-  function partition(condition) {
-    return (arr) =>
-      !Array.isArray(arr)
-        ? []
-        : arr.reduce(
-            ([pass, fail], elem) =>
-              condition(elem)
-                ? [[...pass, elem], fail]
-                : [pass, [...fail, elem]],
-            [[], []]
-          );
-  }
   return combine(
-    onEmpty(() => ({})),
+    onEmpty(() => ""),
     onString(() => state),
     onArray(() =>
       state.length === 1
         ? narrow(state[0])
         : state.map(narrow).filter((item) => !isEmpty(item))
     ),
-    onObject(() => {
-      const [partials, entries] = partition((entry) => entry.some(isEmpty))(
+    onObject(
+      onCondition(
+        () =>
+          Object.entries(state).length === 1 &&
+          Object.entries(state)[0].some(isEmpty),
+        () => narrow(Object.entries(state)[0].filter((e) => !isEmpty(e))[0])
+      )
+    ),
+    onObject(
+      onCondition(
+        () => Object.values(state).every(isEmpty),
+        () => Object.keys(state)
+      )
+    ),
+    onObject(() =>
+      Object.fromEntries(
         Object.entries(state).map(([key, value]) => [key, narrow(value)])
-      );
-      const filteredPartials = partials.flat().filter((e) => !isEmpty(e));
-      return filteredPartials.length === 0
-        ? Object.fromEntries(entries)
-        : narrow(
-            entries.length === 0
-              ? filteredPartials
-              : [Object.fromEntries(entries), ...filteredPartials]
-          );
-    })
+      )
+    )
   )(state, state);
   // We use state as the unitValue so this becomes
   // a passthrough for unrecognized state shapes.
@@ -336,27 +338,25 @@ const reduce = trampoline(function _reduce(
       )(state, state);
     }
 
-    case DELETE_KEY_FROM_OBJECT: {
-      function withoutKey(obj, key) {
-        if (!obj) return narrow({});
-        const { [key]: _, ...withoutKey } = obj;
-        return narrow(withoutKey);
-      }
+    case DELETE_KEY_FROM_OBJECT:
       return combine(
-        onArray(() =>
-          recur(
-            state,
-            withPath(...action.path.slice(0, -1))(
-              ReplaceInArray(
-                action.path.slice(-1),
-                withoutKey(state[action.path.slice(-1)], action.payload)
+        onArray(
+          onPath(() =>
+            recur(
+              state[path],
+              withPath(...action.path.slice(1))(
+                DeleteFromObject(action.payload)
               )
             )
           )
         ),
-        onObject(() => withoutKey(state, action.payload))
+        onObject(
+          onCondition(
+            () => Object.keys(state).includes(action.payload),
+            () => void delete state[action.payload]
+          )
+        )
       )(state, state);
-    }
 
     case DEMOTE_OBJECT_TO_ARRAY:
       return narrow(
